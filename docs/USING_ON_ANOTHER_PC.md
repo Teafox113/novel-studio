@@ -2,10 +2,10 @@
 
 ## 安裝
 
-一般 Windows 10／11 使用者建議使用：
+請先從 https://github.com/Teafox113/novel-studio/releases 下載安裝包。一般 Windows 10／11 使用者建議使用：
 
 ```text
-release/Novel-Studio-0.9.0-Windows-x64-Setup.exe
+release/Novel-Studio-0.10.0-Windows-x64-Setup.exe
 ```
 
 安裝程式會安裝在目前的 Windows 使用者帳號，不需要系統管理員權限。
@@ -15,7 +15,7 @@ release/Novel-Studio-0.9.0-Windows-x64-Setup.exe
 企業環境或需要 MSI 部署時，可使用：
 
 ```text
-release/Novel-Studio-0.9.0-Windows-x64-zh-TW.msi
+release/Novel-Studio-0.10.0-Windows-x64-zh-TW.msi
 ```
 
 ## 搬移小說
@@ -51,3 +51,4 @@ release/Novel-Studio-0.9.0-Windows-x64-zh-TW.msi
 - Windows 安裝版只支援 x64 電腦。
 - macOS、Linux、Android 與 iPhone 尚未發布。
 - `.novel` 目前只包含小說結構與文字；未來加入的圖片、PDF 及音訊會再納入封裝。
+

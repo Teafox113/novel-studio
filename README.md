@@ -6,7 +6,7 @@ Novel Studio 是以繁體中文介面為主、本機優先的長篇小說編輯�
 
 以 React、TypeScript、Tiptap 與 Tauri 2 建立，提供瀏覽器開發模式與 Windows 桌面應用程式。
 
-> 開發中：版本設定為 0.9.0，原始碼已包含後續新增的版本比較及打字機模式。這些更新尚未重新打包為 Windows 安裝程式。本儲存庫提供原始碼，不包含本機 `release/` 安裝檔。
+> 目前版本：**0.10.0**。Windows x64 安裝檔請至 [GitHub Releases](https://github.com/Teafox113/novel-studio/releases/tag/v0.10.0) 下載。一般使用者選擇 Setup.exe，需要 MSI 部署時選擇 .msi，擇一安裝即可。更新前請先匯出 .novel 備份。
 
 ## 功能
 
@@ -119,3 +119,4 @@ docs/             功能說明與路線圖
 ## 授權
 
 目前尚未指定開源授權，公開原始碼不等於授予任意使用、修改或再散布的許可。若有再利用需求，請先聯絡專案維護者。第三方依賴依各自授權條款使用。
+

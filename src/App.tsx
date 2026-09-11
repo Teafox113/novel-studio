@@ -41,6 +41,7 @@ import { QuickCaptureDialog } from "./components/QuickCaptureDialog";
 import { ResearchLibrary } from "./components/ResearchLibrary";
 import { ResearchQuickPanel } from "./components/ResearchQuickPanel";
 import { StoryEditor } from "./components/StoryEditor";
+import { VersionInfo } from "./components/VersionInfo";
 import { SnapshotComparison } from "./components/SnapshotComparison";
 import { TimelineWorkspace } from "./components/TimelineWorkspace";
 import { WorldBible } from "./components/WorldBible";
@@ -1528,6 +1529,7 @@ function App() {
           <strong>{project.title}</strong>
         </div>
         <div className="topbar-actions">
+          <VersionInfo />
           <button
             className="search-button"
             onClick={() => setSearchOpen(true)}

@@ -5277,3 +5277,14 @@ kbd {
   .typewriter-mode .story-editor .tiptap { padding-left: 24px; padding-right: 24px; }
   .typewriter-mode .floating-reference { height: min(450px, calc(100vh - 100px)); }
 }
+.version-info { position: relative; }
+.version-trigger { border: 1px solid #ddd4c8; border-radius: 6px; background: #f6f1e9; color: #796149; padding: 7px 10px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.version-panel { position: fixed; z-index: 90; right: 18px; top: 62px; width: min(440px, calc(100vw - 36px)); max-height: calc(100vh - 90px); overflow: auto; padding: 24px; border: 1px solid #d9ccba; border-radius: 12px; background: #fffaf2; box-shadow: 0 18px 60px #30251c40; color: #534b40; font-size: 13px; line-height: 1.75; }
+.version-panel h2 { margin: 6px 0; font-family: Georgia, serif; color: #352e25; }
+.version-panel h2 small { font-size: 14px; color: #98714c; }
+.version-panel h3 { font-size: 13px; margin: 20px 0 5px; border-bottom: 1px solid #e7ddd0; padding-bottom: 5px; color: #8e603d; }
+.version-panel p { margin: 6px 0; }
+.version-panel ul { padding-left: 20px; }
+.version-panel a { color: #86603b; }
+.version-close { position: absolute; right: 12px; top: 12px; border: 0; background: transparent; color: #766858; cursor: pointer; }
+@media (max-width: 700px) { .version-trigger { font-size: 10px; padding: 5px; } }
