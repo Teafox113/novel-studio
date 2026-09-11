@@ -1,0 +1,121 @@
+# Novel Studio
+
+**讓手稿、人物、世界觀與研究資料，留在同一個創作空間。**
+
+Novel Studio 是以繁體中文介面為主、本機優先的長篇小說編輯器。從場景卡片、人物設定到雙軸時間線，協助作者整理故事；需要專心寫作時，可以切換打字機模式，讓參考資料留在角落。
+
+以 React、TypeScript、Tiptap 與 Tauri 2 建立，提供瀏覽器開發模式與 Windows 桌面應用程式。
+
+> 開發中：版本設定為 0.9.0，原始碼已包含後續新增的版本比較及打字機模式。這些更新尚未重新打包為 Windows 安裝程式。本儲存庫提供原始碼，不包含本機 `release/` 安裝檔。
+
+## 功能
+
+| 創作需求 | 已有功能 |
+| --- | --- |
+| 寫作與編排 | 樹狀手稿、場景編輯、卡片牆、大綱表格、摘要、狀態與目標字數 |
+| 沉浸寫作 | 暖色紙張、深色書房、游標行跟隨、Esc 返回、四角參考浮窗與收合 |
+| 世界觀管理 | 人物、地點、勢力、物品、設定、專有名詞、別名、屬性與關係 |
+| 故事時間線 | 分開管理故事發生順序與閱讀順序，連結場景與人物 |
+| 靈感與研究 | 隨手記事、Tag、網址、筆記、圖片與 PDF 附件、快速貼上或拖入 |
+| 搜尋 | 跨手稿與資料庫搜尋，支援詞組、`#Tag`、`type:人物` 與快速跳轉 |
+| 備份 | 自動備份、手動快照、還原前安全備份、備份與目前版本欄位比較 |
+| 專案交換 | 匯入／匯出 `.novel`，在瀏覽器與 Windows 之間手動搬移 |
+| 書稿輸出 | DOCX、EPUB 3、HTML、UTF-8 文字，以及系統列印為 PDF |
+| 本機審核 | 摘要與事實候選、缺漏與一致性提示、來源引文、接受／略過紀錄 |
+
+目前的「AI 協作」是本機規則分析，尚未串接大型語言模型或雲端問答。
+
+## 快速開始
+
+需要 Node.js 22 或更新的相容 LTS 版本，以及 npm。
+
+```bash
+git clone https://github.com/Teafox113/novel-studio.git
+cd novel-studio
+npm ci
+npm run dev
+```
+
+依終端機顯示的網址開啟瀏覽器；預設為 `http://127.0.0.1:4173/`。首次使用會載入虛構示範專案「霧港十三夜」。
+
+```bash
+npm test          # 執行 Vitest 測試
+npm run build     # TypeScript 檢查與正式網頁建置
+npm run preview   # 預覽建置結果
+```
+
+SQLite schema 檢查另需 Python 3：
+
+```bash
+npm run test:schema
+```
+
+## 建置 Windows 桌面版
+
+需要 Windows、Rust（MSVC 工具鏈）、Microsoft C++ Build Tools、Windows SDK 與 WebView2 Runtime。安裝前置工具後，在專案目錄執行：
+
+```powershell
+npm ci
+npm run desktop:dev
+# 或建立安裝程式
+npm run desktop:build
+```
+
+建置腳本會尋找 Visual Studio C++ 工具，以及 `CARGO_HOME` 或目前使用者的 `.cargo` 目錄。安裝包輸出至 `src-tauri/target/release/bundle/`。
+
+目前桌面發布以 Windows 為主；儲存庫中的其他平台圖示不代表已支援該平台。
+
+## 資料保存與搬移
+
+- 瀏覽器模式使用目前瀏覽器、目前來源網址的 localStorage；清除網站資料會影響手稿與備份。
+- Windows 桌面模式使用本機 SQLite。
+- 小說與內嵌附件不會因為開啟本機審核而傳送到模型服務；自行開啟外部來源連結會連線到該網站。
+- 請定期透過「專案與備份」匯出 `.novel`，另存到自己的備份位置。
+- `.novel` 包含專案內容及附件，請勿把私人小說放進公開儲存庫。
+- 目前沒有帳號或即時雲端同步；跨電腦需手動交換專案。
+
+## 使用提示
+
+- `Ctrl+K`：全專案搜尋。
+- `Ctrl+Shift+R`：研究浮窗。
+- 選取場景後按「打字機」：進入專注模式；`Esc` 返回。
+- 備份列表的「比較」：檢查備份到目前內容的新增、刪除與欄位修改。
+
+## 尚在規劃
+
+- 新建、開啟、另存及多小說專案管理。
+- 逐字差異標色、單一場景還原與選擇性合併。
+- 人物關係圖、自訂書稿輸出範本。
+- PDF 全文擷取、OCR 與頁碼引用。
+- 可選語言模型供應器、行動伴侶與跨裝置同步。
+
+參考浮窗目前是四角定位，尚無任意拖曳及多份文件並排。版本比較目前為欄位級對照。中文實體輸入法、桌面 PDF 預覽與不同裝置仍需要更多實機驗證。
+
+## 專案結構
+
+```text
+src/components/   React 介面與編輯器
+src/domain/       資料模型、遷移與版本比較
+src/storage/      瀏覽器與 SQLite 儲存
+src/ai/           本機審核
+src/compile/      書稿組裝與輸出
+src-tauri/        Windows 原生殼、權限及資料庫 migration
+scripts/          建置輔助與 schema 驗證
+docs/             功能說明與路線圖
+```
+
+## 文件與回饋
+
+- [開發路線圖](docs/ROADMAP.md)
+- [打字機模式](docs/TYPEWRITER_MODE.md)
+- [專案架構](docs/ARCHITECTURE.md)
+- [專案搜尋](docs/PROJECT_SEARCH.md)
+- [研究浮窗與快速收集](docs/QUICK_CAPTURE_AND_RESEARCH_PEEK.md)
+- [書稿匯出](docs/COMPILE_EXPORT.md)
+- [本機審核](docs/AI_REVIEW.md)
+
+歡迎透過 GitHub Issues 回報問題或提出構想，請附上重現步驟、作業系統與使用模式。範例請使用虛構或去識別內容，避免附上私人稿件。
+
+## 授權
+
+目前尚未指定開源授權，公開原始碼不等於授予任意使用、修改或再散布的許可。若有再利用需求，請先聯絡專案維護者。第三方依賴依各自授權條款使用。

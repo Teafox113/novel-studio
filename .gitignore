@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.vite/
+src-tauri/target/
+*.local
+*.log
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+.DS_Store
+Thumbs.db
+
+# Local releases, generated schemas and private writing data
+release/
+src-tauri/gen/
+*.novel
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
