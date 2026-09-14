@@ -1,3 +1,4 @@
+import { defaultHistory, validateHistory } from "./fictionalHistory";
 import type {
   AiFinding,
   AiFindingActionType,
@@ -352,7 +353,8 @@ export function migrateStoryProject(value: unknown): StoryProject {
     : [];
 
   return {
-    schemaVersion: 6,
+    schemaVersion: 7,
+    fictionalHistory: value.fictionalHistory === undefined ? defaultHistory() : validateHistory(value.fictionalHistory),
     id: String(value.id ?? crypto.randomUUID()),
     title: String(value.title ?? "未命名小說"),
     subtitle: String(value.subtitle ?? ""),

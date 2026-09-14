@@ -6,13 +6,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ## 下載並安裝（一般使用者）
 
-**目前版本：0.11.0 · Windows 10／11 x64**
+**目前版本：0.12.0 · Windows 10／11 x64**
 
 ### 推薦：下載安裝版
 
-**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.11.0/Novel-Studio-0.11.0-Windows-x64-Setup.exe)**
+**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.12.0/Novel-Studio-0.12.0-Windows-x64-Setup.exe)**
 
-1. 點上方連結，下載 `Novel-Studio-0.11.0-Windows-x64-Setup.exe`。
+1. 點上方連結，下載 `Novel-Studio-0.12.0-Windows-x64-Setup.exe`。
 2. 開啟下載的檔案，依安裝畫面指示完成安裝。
 3. 從 Windows 開始功能表開啟 **Novel Studio**，即可開始使用。
 
@@ -20,13 +20,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ### 不想安裝：下載免安裝版
 
-**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.11.0/Novel-Studio-0.11.0-Windows-x64-NoInstall.zip)**
+**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.12.0/Novel-Studio-0.12.0-Windows-x64-NoInstall.zip)**
 
 下載後按右鍵選「解壓縮全部」，再進入解壓後的資料夾，開啟 `Novel-Studio.exe`。請完整解壓後再執行。
 
 免安裝版需要 WebView2 Runtime；若電腦缺少此執行環境，可改用上方安裝版。**資料仍保存在 Windows 使用者目錄，不會跟著 ZIP 或 EXE 搬移**；安裝版與免安裝版共用本機資料，請勿同時開啟編輯。
 
-[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.11.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
+[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.12.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
 
 > 上方 GitHub 的「Code → Download ZIP」與 Releases 的「Source code」是原始碼。要直接使用軟體，請選本頁的 **安裝版 EXE** 或 **免安裝 ZIP**。
 
@@ -54,6 +54,7 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 | 寫作與編排 | 樹狀手稿、場景編輯、卡片牆、大綱表格、摘要、狀態與目標字數 |
 | 沉浸寫作 | 暖色紙張、深色書房、游標行跟隨、Esc 返回、四角參考浮窗與收合 |
 | 世界觀管理 | 人物、地點、勢力、物品、設定、專有名詞、別名、屬性與關係 |
+| 架空歷史 | 自訂曆法、紀元、月份與週日，虛構日期排序及場景／世界觀連結 |
 | 故事時間線 | 分開管理故事發生順序與閱讀順序，連結場景與人物 |
 | 靈感與研究 | 隨手記事、Tag、網址、筆記、圖片與 PDF 附件、快速貼上或拖入 |
 | 搜尋 | 跨手稿與資料庫搜尋，支援詞組、`#Tag`、`type:人物` 與快速跳轉 |
@@ -94,6 +95,8 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 參考浮窗目前是四角定位，尚無任意拖曳及多份文件並排。版本比較目前為欄位級對照。中文實體輸入法、桌面 PDF 預覽與不同裝置仍需要更多實機驗證。
 
 ## 文件與回饋
+
+- [架空歷史與曆法設定](docs/FICTIONAL_HISTORY.md)
 
 - [開發路線圖](docs/ROADMAP.md)
 - [打字機模式](docs/TYPEWRITER_MODE.md)

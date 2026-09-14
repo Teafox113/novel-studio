@@ -5296,3 +5296,23 @@ kbd {
 .project-library button:disabled { opacity: .55; cursor: default; }
 .library-list { display: grid; gap: 8px; }
 .library-list button { text-align: left; overflow-wrap: anywhere; }
+.history-workspace { height: 100%; overflow: auto; background: #f4efe5; color: #514638; padding: 24px; }
+.history-workspace > header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.history-workspace > header > div { flex: 1; }
+.history-workspace h1 { font-family: Georgia, 'Noto Serif TC', serif; font-size: 27px; margin: 4px 0; }
+.history-workspace button, .history-calendar button { padding: 9px 13px; border: 1px solid #c8b598; border-radius: 7px; background: #fffaf0; color: #725633; cursor: pointer; }
+.history-note { font-size: 13px; line-height: 1.8; }
+.history-columns { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(300px, 1fr); gap: 24px; margin-top: 20px; }
+.history-timeline { border-left: 2px solid #baa17a; padding-left: 20px; }
+.history-event { display: block; width: 100%; margin: 12px 0; text-align: left; position: relative; }
+.history-event::before { content: ''; position: absolute; top: 20px; left: -27px; width: 10px; height: 10px; border-radius: 50%; background: #a8824f; }
+.history-event time, .history-event strong, .history-event span { display: block; overflow-wrap: anywhere; }
+.history-event time { font-size: 12px; color: #947345; }.history-event strong { margin: 8px 0; }.history-event span { font-size: 13px; }
+.history-workspace .history-event.active { border-color: #8e6530; background: #eadbc3; }
+.history-detail { background: #fffcf6; padding: 22px; border-radius: 10px; }
+.history-workspace label, .history-calendar label { display: block; margin: 10px 0; font-size: 13px; }
+.history-workspace input:not([type=checkbox]), .history-workspace textarea, .history-workspace select, .history-calendar input, .history-calendar textarea { display: block; width: 100%; margin-top: 6px; border: 1px solid #d2c3ac; padding: 9px; background: white; color: #4c4235; border-radius: 5px; }
+.history-date { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; }
+.history-calendar { width: min(520px, calc(100vw - 32px)); padding: 26px; max-height: calc(100vh - 40px); overflow: auto; border-radius: 12px; background: #fffaf0; }
+.history-error { color: #a13628; }.history-empty { padding: 40px 10px; line-height: 1.9; }
+@media(max-width: 1000px) { .history-columns { grid-template-columns: 1fr; } }

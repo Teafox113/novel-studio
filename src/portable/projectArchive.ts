@@ -9,6 +9,7 @@ import type {
   TimelineEvent,
 } from "../domain/models";
 import { migrateStoryProject } from "../domain/migrations";
+import { version } from "../../package.json";
 
 export const PORTABLE_PROJECT_FORMAT = "novel-studio-project";
 export const PORTABLE_PROJECT_VERSION = 1;
@@ -158,7 +159,7 @@ function hasStringArray(value: unknown): value is string[] {
 export function validateStoryProject(value: unknown): StoryProject {
   if (
     !isRecord(value) ||
-    ![1, 2, 3, 4, 5, 6].includes(Number(value.schemaVersion)) ||
+    ![1, 2, 3, 4, 5, 6, 7].includes(Number(value.schemaVersion)) ||
     !isString(value.id) ||
     !isString(value.title) ||
     !isString(value.subtitle) ||
@@ -288,7 +289,7 @@ export function createPortableArchive(
   return {
     format: PORTABLE_PROJECT_FORMAT,
     formatVersion: PORTABLE_PROJECT_VERSION,
-    appVersion: "0.9.0",
+    appVersion: version,
     exportedAt: new Date().toISOString(),
     project: structuredClone(project),
   };

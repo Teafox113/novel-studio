@@ -40,7 +40,7 @@ describe("portable project archive", () => {
     });
 
     const restored = parsePortableProject(serializePortableProject(migrated));
-    expect(restored.schemaVersion).toBe(6);
+    expect(restored.schemaVersion).toBe(7);
   });
 
   it("keeps embedded research attachments in the portable project", () => {

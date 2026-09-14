@@ -42,6 +42,7 @@ import { ResearchLibrary } from "./components/ResearchLibrary";
 import { ResearchQuickPanel } from "./components/ResearchQuickPanel";
 import { StoryEditor } from "./components/StoryEditor";
 import { VersionInfo } from "./components/VersionInfo";
+import { FictionalHistoryWorkspace } from "./components/FictionalHistoryWorkspace";
 import { ProjectLibrary } from "./components/ProjectLibrary";
 import { createBlankProject, duplicateProject } from "./domain/projectLibrary";
 import { SnapshotComparison } from "./components/SnapshotComparison";
@@ -88,6 +89,7 @@ type Section =
   | "manuscript"
   | "world"
   | "timeline"
+  | "history"
   | "research"
   | "compile"
   | "ai";
@@ -127,6 +129,7 @@ const sectionItems = [
   { id: "manuscript" as const, label: "手稿", icon: BookOpenText },
   { id: "world" as const, label: "世界觀", icon: Library },
   { id: "timeline" as const, label: "時間線", icon: Waypoints },
+  { id: "history" as const, label: "架空歷史一覽", icon: History },
   { id: "research" as const, label: "研究", icon: FileSearch },
   { id: "compile" as const, label: "匯出", icon: FileOutput },
   { id: "ai" as const, label: "AI 協作", icon: Sparkles },
@@ -136,6 +139,7 @@ const moduleCopy: Record<
   Exclude<Section, "manuscript">,
   { eyebrow: string; title: string; description: string; items: string[] }
 > = {
+  history: { eyebrow: "FICTIONAL HISTORY", title: "架空歷史一覽", description: "設定世界曆法與歷史年代。", items: ["曆法", "紀元", "歷史事件"] },
   world: {
     eyebrow: "WORLD BIBLE",
     title: "世界觀資料庫",
@@ -984,6 +988,7 @@ function App() {
             timelineEvents: current.timelineEvents.filter(
               (event) => event.id !== eventId,
             ),
+            fictionalHistory: current.fictionalHistory ? { ...current.fictionalHistory, dates: Object.fromEntries(Object.entries(current.fictionalHistory.dates).filter(([id]) => id !== eventId)) } : undefined,
             updatedAt,
           }
         : current,
@@ -1914,6 +1919,8 @@ function App() {
             onOpenResearch={openWorldResearch}
           />
         </main>
+      ) : section === "history" ? (
+        <main className="module-workspace"><FictionalHistoryWorkspace key={project.id} project={project} onChange={setProject} onOpenScene={openWorldScene} /></main>
       ) : section === "timeline" ? (
         <main className="module-workspace timeline-module-workspace">
           <TimelineWorkspace

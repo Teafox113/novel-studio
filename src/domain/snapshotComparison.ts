@@ -38,6 +38,7 @@ export function compareProjectVersions(before: StoryProject, after: StoryProject
     }
   }
   compare("專案", [{ id: "metadata", title: before.title, subtitle: before.subtitle, author: before.author }], [{ id: "metadata", title: after.title, subtitle: after.subtitle, author: after.author }]);
+  compare("架空歷史", before.fictionalHistory ? [{ id: "history", title: "曆法與編年", ...before.fictionalHistory }] : [], after.fictionalHistory ? [{ id: "history", title: "曆法與編年", ...after.fictionalHistory }] : []);
   const nodes = (project: StoryProject) => project.nodes.map(node => ({ ...node, plainText: project.documents[node.documentId ?? ""]?.plainText, content: project.documents[node.documentId ?? ""]?.content }));
   compare("手稿", nodes(before), nodes(after));
   const collections = [

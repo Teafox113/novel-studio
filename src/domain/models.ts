@@ -217,7 +217,8 @@ export interface AiFinding {
 }
 
 export interface StoryProject {
-  schemaVersion: 6;
+  schemaVersion: 6 | 7;
+  fictionalHistory?: import("./fictionalHistory").FictionalHistory;
   id: string;
   title: string;
   subtitle: string;
