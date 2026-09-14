@@ -6,13 +6,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ## 下載並安裝（一般使用者）
 
-**目前版本：0.12.0 · Windows 10／11 x64**
+**目前版本：0.13.0 · Windows 10／11 x64**
 
 ### 推薦：下載安裝版
 
-**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.12.0/Novel-Studio-0.12.0-Windows-x64-Setup.exe)**
+**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.13.0/Novel-Studio-0.13.0-Windows-x64-Setup.exe)**
 
-1. 點上方連結，下載 `Novel-Studio-0.12.0-Windows-x64-Setup.exe`。
+1. 點上方連結，下載 `Novel-Studio-0.13.0-Windows-x64-Setup.exe`。
 2. 開啟下載的檔案，依安裝畫面指示完成安裝。
 3. 從 Windows 開始功能表開啟 **Novel Studio**，即可開始使用。
 
@@ -20,13 +20,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ### 不想安裝：下載免安裝版
 
-**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.12.0/Novel-Studio-0.12.0-Windows-x64-NoInstall.zip)**
+**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.13.0/Novel-Studio-0.13.0-Windows-x64-NoInstall.zip)**
 
 下載後按右鍵選「解壓縮全部」，再進入解壓後的資料夾，開啟 `Novel-Studio.exe`。請完整解壓後再執行。
 
 免安裝版需要 WebView2 Runtime；若電腦缺少此執行環境，可改用上方安裝版。**資料仍保存在 Windows 使用者目錄，不會跟著 ZIP 或 EXE 搬移**；安裝版與免安裝版共用本機資料，請勿同時開啟編輯。
 
-[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.12.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
+[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.13.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
 
 > 上方 GitHub 的「Code → Download ZIP」與 Releases 的「Source code」是原始碼。要直接使用軟體，請選本頁的 **安裝版 EXE** 或 **免安裝 ZIP**。
 
@@ -38,6 +38,10 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 4. 在「第一章」輸入正文，等右上角顯示 **「已儲存」**。
 
 想專心寫作可按「打字機」，按 `Esc` 返回；想保留一份檔案，使用「⋯ → 匯出專案」保存 `.novel` 備份。
+
+### 字太小？調整介面與正文
+
+點左側 **設定 → 顯示與字級**，可選介面字型與 **100%～175%** 縮放。小說正文另有字型與 **15～36px** 字級，介面放大不會改變正文字級。寫作區上方的「正文字級」也可直接調整，打字機模式同樣適用。
 
 ### 安裝與升級提醒
 

@@ -42,6 +42,7 @@ import { ResearchLibrary } from "./components/ResearchLibrary";
 import { ResearchQuickPanel } from "./components/ResearchQuickPanel";
 import { StoryEditor } from "./components/StoryEditor";
 import { VersionInfo } from "./components/VersionInfo";
+import { fontChoices, uiScales, readFont, readScale, readEditorSize, manuscriptCssSize, type FontChoice } from "./domain/appearance";
 import { FictionalHistoryWorkspace } from "./components/FictionalHistoryWorkspace";
 import { ProjectLibrary } from "./components/ProjectLibrary";
 import { createBlankProject, duplicateProject } from "./domain/projectLibrary";
@@ -220,12 +221,11 @@ function App() {
     Number(localStorage.getItem("novel-studio:research-peek-width") ?? 420),
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [uiScale, setUiScale] = useState<100 | 110 | 125>(() => {
-    const saved = Number(localStorage.getItem("novel-studio:ui-scale"));
-    return saved === 110 || saved === 125 ? saved : 100;
-  });
+  const [uiScale, setUiScale] = useState(() => readScale(localStorage.getItem("novel-studio:ui-scale")));
+  const [uiFont, setUiFont] = useState<FontChoice>(() => readFont(localStorage.getItem("novel-studio:ui-font"), "jhenghei"));
+  const [editorFont, setEditorFont] = useState<FontChoice>(() => readFont(localStorage.getItem("novel-studio:editor-font"), "serif"));
   const [editorFontSize, setEditorFontSize] = useState(() =>
-    Number(localStorage.getItem("novel-studio:editor-font-size") ?? 18),
+    readEditorSize(localStorage.getItem("novel-studio:editor-font-size")),
   );
   const hydrated = useRef(false);
 
@@ -314,14 +314,18 @@ function App() {
     document.documentElement.style.setProperty("--ui-inverse", `${10000 / uiScale}%`);
     document.documentElement.style.setProperty(
       "--editor-font-size",
-      `${editorFontSize}px`,
+      `${manuscriptCssSize(editorFontSize, uiScale)}px`,
     );
+    document.documentElement.style.setProperty("--ui-font-family", fontChoices[uiFont].css);
+    document.documentElement.style.setProperty("--manuscript-font-family", fontChoices[editorFont].css);
+    localStorage.setItem("novel-studio:ui-font", uiFont);
+    localStorage.setItem("novel-studio:editor-font", editorFont);
     localStorage.setItem("novel-studio:ui-scale", String(uiScale));
     localStorage.setItem(
       "novel-studio:editor-font-size",
       String(editorFontSize),
     );
-  }, [editorFontSize, uiScale]);
+  }, [editorFontSize, uiScale, uiFont, editorFont]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -1843,6 +1847,8 @@ function App() {
                     />
                   </div>
                   <StoryEditor
+                    fontSize={editorFontSize}
+                    onFontSizeChange={setEditorFontSize}
                     typewriter={focusMode}
                     documentId={selectedDocument.id}
                     content={selectedDocument.content}
@@ -2021,6 +2027,7 @@ function App() {
       )}
       {settingsOpen && (
         <AppearanceDialog
+          uiFont={uiFont} editorFont={editorFont} onUiFont={setUiFont} onEditorFont={setEditorFont}
           uiScale={uiScale}
           editorFontSize={editorFontSize}
           onUiScale={setUiScale}
@@ -2051,15 +2058,17 @@ function App() {
 }
 
 function AppearanceDialog({
+  uiFont, editorFont, onUiFont, onEditorFont,
   uiScale,
   editorFontSize,
   onUiScale,
   onEditorFontSize,
   onClose,
 }: {
-  uiScale: 100 | 110 | 125;
+  uiFont: FontChoice; editorFont: FontChoice; onUiFont: (value: FontChoice) => void; onEditorFont: (value: FontChoice) => void;
+  uiScale: number;
   editorFontSize: number;
-  onUiScale: (value: 100 | 110 | 125) => void;
+  onUiScale: (value: number) => void;
   onEditorFontSize: (value: number) => void;
   onClose: () => void;
 }) {
@@ -2073,14 +2082,16 @@ function AppearanceDialog({
         <div className="appearance-setting">
           <div><strong>介面縮放</strong><span>放大選單、欄位、列表與輔助文字</span></div>
           <div className="appearance-options">
-            {([100, 110, 125] as const).map((value) => <button key={value} className={uiScale === value ? "active" : ""} onClick={() => onUiScale(value)}>{value}%</button>)}
+            {uiScales.map((value) => <button key={value} className={uiScale === value ? "active" : ""} onClick={() => onUiScale(value)}>{value}%</button>)}
           </div>
         </div>
+        <div className="appearance-setting"><label>介面字型<select value={uiFont} onChange={e => onUiFont(e.target.value as FontChoice)}>{Object.entries(fontChoices).map(([key, font]) => <option key={key} value={key}>{font.label}</option>)}</select></label><span>套用側欄、清單、選單與設定，不改變正文。</span></div>
+        <div className="appearance-setting"><label>小說正文字型<select value={editorFont} onChange={e => onEditorFont(e.target.value as FontChoice)}>{Object.entries(fontChoices).map(([key, font]) => <option key={key} value={key}>{font.label}</option>)}</select></label><span>一般寫作與打字機模式共用此設定。</span></div>
         <div className="appearance-setting">
-          <div><strong>小說正文字級</strong><span>只調整編輯器文字，不壓縮其他介面</span></div>
-          <label className="editor-font-slider"><input type="range" min="15" max="24" step="1" value={editorFontSize} onChange={(event) => onEditorFontSize(Number(event.target.value))} /><b>{editorFontSize}px</b></label>
+          <div><strong>小說正文字級</strong><span>與介面縮放獨立，可在寫作區直接調整</span></div>
+          <label className="editor-font-slider"><input aria-label="小說正文字級" type="range" min="15" max="36" step="1" value={editorFontSize} onChange={(event) => onEditorFontSize(Number(event.target.value))} /><b>{editorFontSize}px</b></label>
         </div>
-        <div className="appearance-preview" style={{ fontSize: editorFontSize }}>港口的霧在凌晨前漫過石階，遠處傳來第一聲鐘響。</div>
+        <div className="appearance-preview" style={{ fontSize: manuscriptCssSize(editorFontSize, uiScale), fontFamily: fontChoices[editorFont].css }}>港口的霧在凌晨前漫過石階，遠處傳來第一聲鐘響。</div>
         <footer><button onClick={onClose}>完成</button></footer>
       </section>
     </div>

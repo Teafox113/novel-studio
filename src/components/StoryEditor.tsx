@@ -14,6 +14,8 @@ import {
 import type { RichTextDocument } from "../domain/models";
 
 interface StoryEditorProps {
+  fontSize: number;
+  onFontSizeChange: (size: number) => void;
   typewriter?: boolean;
   documentId: string;
   content: RichTextDocument;
@@ -25,6 +27,7 @@ export function StoryEditor({
   content,
   onChange,
   typewriter = false,
+  fontSize, onFontSizeChange,
 }: StoryEditorProps) {
   const editor = useEditor(
     {
@@ -57,7 +60,8 @@ export function StoryEditor({
         if (!scroller) return;
         const caret = editor.view.coordsAtPos(editor.state.selection.head);
         const bounds = scroller.getBoundingClientRect();
-        scroller.scrollTop += caret.top - bounds.top - bounds.height * 0.42;
+        const zoom = bounds.height / (scroller as HTMLElement).offsetHeight;
+        scroller.scrollTop += (caret.top - bounds.top - bounds.height * 0.42) / (zoom || 1);
       });
     };
     editor.on("selectionUpdate", center);
@@ -128,6 +132,9 @@ export function StoryEditor({
 
   return (
     <div className="story-editor">
+      <label className="manuscript-size-control">正文字級
+        <select aria-label="寫作區正文字級" value={fontSize} onChange={e => onFontSizeChange(Number(e.target.value))}>{Array.from({ length: 22 }, (_, i) => i + 15).map(size => <option key={size} value={size}>{size}px</option>)}</select>
+      </label>
       <div className="format-toolbar">
         {tools.map(({ label, icon: Icon, active, action }, index) => (
           <button
