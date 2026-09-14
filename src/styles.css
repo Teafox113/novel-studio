@@ -5288,3 +5288,11 @@ kbd {
 .version-panel a { color: #86603b; }
 .version-close { position: absolute; right: 12px; top: 12px; border: 0; background: transparent; color: #766858; cursor: pointer; }
 @media (max-width: 700px) { .version-trigger { font-size: 10px; padding: 5px; } }
+.project-library { width: min(600px, calc(100vw - 32px)); max-height: calc(100vh - 60px); overflow: auto; background: #fffaf2; padding: 24px; border-radius: 12px; color: #534b40; font-size: 14px; line-height: 1.7; }
+.project-library header, .library-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.project-library label { display: block; margin: 12px 0; }
+.project-library input { display: block; width: 100%; border: 1px solid #cbbcaa; padding: 9px; border-radius: 6px; }
+.project-library button { padding: 8px 12px; border: 1px solid #cbbcaa; background: #f2e8da; color: #58442c; border-radius: 6px; cursor: pointer; }
+.project-library button:disabled { opacity: .55; cursor: default; }
+.library-list { display: grid; gap: 8px; }
+.library-list button { text-align: left; overflow-wrap: anywhere; }

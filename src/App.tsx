@@ -42,6 +42,8 @@ import { ResearchLibrary } from "./components/ResearchLibrary";
 import { ResearchQuickPanel } from "./components/ResearchQuickPanel";
 import { StoryEditor } from "./components/StoryEditor";
 import { VersionInfo } from "./components/VersionInfo";
+import { ProjectLibrary } from "./components/ProjectLibrary";
+import { createBlankProject, duplicateProject } from "./domain/projectLibrary";
 import { SnapshotComparison } from "./components/SnapshotComparison";
 import { TimelineWorkspace } from "./components/TimelineWorkspace";
 import { WorldBible } from "./components/WorldBible";
@@ -201,6 +203,9 @@ function App() {
   const [backupDialogOpen, setBackupDialogOpen] = useState(false);
   const [snapshots, setSnapshots] = useState<ProjectSnapshot[]>([]);
   const [operationBusy, setOperationBusy] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryProjects, setLibraryProjects] = useState<Array<{ id: string; title: string }>>([]);
+  const [libraryError, setLibraryError] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [quickCaptureOpen, setQuickCaptureOpen] = useState(false);
   const [researchPeekOpen, setResearchPeekOpen] = useState(false);
@@ -263,7 +268,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!project || !hydrated.current) return;
+    if (!project || !hydrated.current || operationBusy) return;
     setSaveState("saving");
     const timeout = window.setTimeout(async () => {
       try {
@@ -278,7 +283,7 @@ function App() {
       }
     }, 500);
     return () => window.clearTimeout(timeout);
-  }, [project]);
+  }, [project, operationBusy]);
 
   useEffect(() => {
     const openProjectSearch = (event: KeyboardEvent) => {
@@ -1423,6 +1428,38 @@ function App() {
     }
   };
 
+  const openLibrary = async () => {
+    setTransferMenuOpen(false);
+    setLibraryOpen(true);
+    setLibraryError("");
+    setOperationBusy(true);
+    try { await repository.save(project); setLibraryProjects(await repository.listProjects()); }
+    catch (error) { setLibraryError(error instanceof Error ? error.message : "無法讀取專案清單。"); }
+    finally { setOperationBusy(false); }
+  };
+
+  const changeProject = async (target: StoryProject | string) => {
+    if (operationBusy) return;
+    setOperationBusy(true);
+    setLibraryError("");
+    try {
+      const next = typeof target === "string" ? await repository.loadProject(target) : target;
+      if (!next) throw new Error("找不到這個專案。");
+      await repository.createSnapshot(project, `切換專案前備份 · ${new Date().toLocaleString("zh-TW")}`);
+      await repository.save(project);
+      await repository.save(next);
+      setProject(structuredClone(next));
+      setSelectedId(manuscriptScenes(next)[0]?.id ?? next.nodes[0]?.id ?? "");
+      setSelectedInspirationId(null);
+      setSection("manuscript"); setView("editor"); setFocusMode(false);
+      setResearchPeekOpen(false); setLibraryOpen(false); setSnapshots([]);
+      setStorageError(null); setSaveState("saved");
+      showNotice(`已開啟「${next.title}」`);
+    } catch (error) {
+      setLibraryError(error instanceof Error ? error.message : "切換失敗，目前作品保留。");
+    } finally { setOperationBusy(false); }
+  };
+
   const importProject = async () => {
     setTransferMenuOpen(false);
     setOperationBusy(true);
@@ -1589,6 +1626,7 @@ function App() {
                   <strong>專案與備份</strong>
                   <span>帶到另一台電腦繼續寫</span>
                 </div>
+                <button role="menuitem" onClick={openLibrary}><Library size={17} /><span><strong>我的小說專案</strong><small>新建、開啟與另存副本</small></span></button>
                 <button role="menuitem" onClick={exportProject}>
                   <Download size={17} />
                   <span>
@@ -1949,6 +1987,7 @@ function App() {
           {snapshotNotice}
         </div>
       )}
+      {libraryOpen && <ProjectLibrary projects={libraryProjects} currentId={project.id} busy={operationBusy} error={libraryError} onClose={() => setLibraryOpen(false)} onCreate={(title, author) => changeProject(createBlankProject(title, author))} onCopy={title => changeProject(duplicateProject(project, title))} onOpen={changeProject} />}
       {backupDialogOpen && (
         <BackupDialog
           project={project}

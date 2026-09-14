@@ -79,6 +79,15 @@ export class TauriProjectRepository implements ProjectRepository {
     );
   }
 
+  async listProjects(): Promise<Array<{ id: string; title: string }>> {
+    return (await this.database()).select("SELECT id, title FROM app_projects ORDER BY updated_at DESC");
+  }
+
+  async loadProject(id: string): Promise<StoryProject | null> {
+    const rows = await (await this.database()).select<ProjectRow[]>("SELECT project_json FROM app_projects WHERE id = $1", [id]);
+    return rows.length ? migrateStoryProject(JSON.parse(rows[0].project_json)) : null;
+  }
+
   async createSnapshot(project: StoryProject, label: string): Promise<void> {
     const database = await this.database();
     await this.save(project);

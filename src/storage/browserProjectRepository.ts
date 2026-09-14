@@ -25,7 +25,26 @@ export class BrowserProjectRepository implements ProjectRepository {
   }
 
   async save(project: StoryProject): Promise<void> {
+    const projects = JSON.parse(window.localStorage.getItem("novel-studio.library.v1") ?? "{}") as Record<string, StoryProject>;
+    const previous = await this.load();
+    if (previous) projects[previous.id] = previous;
+    projects[project.id] = project;
+    window.localStorage.setItem("novel-studio.library.v1", JSON.stringify(projects));
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+  }
+
+  async listProjects(): Promise<Array<{ id: string; title: string }>> {
+    const projects = JSON.parse(window.localStorage.getItem("novel-studio.library.v1") ?? "{}") as Record<string, StoryProject>;
+    const active = await this.load();
+    if (active) projects[active.id] = active;
+    return Object.values(projects).map(({ id, title }) => ({ id, title }));
+  }
+
+  async loadProject(id: string): Promise<StoryProject | null> {
+    const active = await this.load();
+    if (active?.id === id) return active;
+    const projects = JSON.parse(window.localStorage.getItem("novel-studio.library.v1") ?? "{}") as Record<string, StoryProject>;
+    return projects[id] ? migrateStoryProject(projects[id]) : null;
   }
 
   async createSnapshot(project: StoryProject, label: string): Promise<void> {

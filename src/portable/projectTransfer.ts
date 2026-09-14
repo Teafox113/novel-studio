@@ -60,6 +60,7 @@ async function selectBrowserProjectFile(): Promise<File | null> {
     input.type = "file";
     input.accept = ".novel,application/json";
     input.style.display = "none";
+    input.addEventListener("cancel", () => { input.remove(); resolve(null); }, { once: true });
     input.addEventListener(
       "change",
       () => {

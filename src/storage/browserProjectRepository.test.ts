@@ -39,6 +39,28 @@ describe("BrowserProjectRepository", () => {
     expect(loaded?.title).toBe("霧港十三夜");
   });
 
+  it("preserves legacy and new projects across switching and reopening", async () => {
+    storage.setItem("novel-studio.project.v1", JSON.stringify(sampleProject));
+    const repository = new BrowserProjectRepository();
+    const other = { ...structuredClone(sampleProject), id: "second", title: "第二部小說" };
+    await repository.save(other);
+    expect(await repository.listProjects()).toHaveLength(2);
+    const original = await repository.loadProject(sampleProject.id);
+    expect(original?.title).toBe(sampleProject.title);
+    await repository.save(original!);
+    const reopened = new BrowserProjectRepository();
+    expect((await reopened.load())?.id).toBe(sampleProject.id);
+    expect((await reopened.loadProject("second"))?.title).toBe("第二部小說");
+    expect(await reopened.loadProject("missing")).toBeNull();
+  });
+
+  it("does not replace the active project when library storage fails", async () => {
+    storage.setItem("novel-studio.project.v1", JSON.stringify(sampleProject));
+    vi.spyOn(storage, "setItem").mockImplementation(() => { throw new Error("quota"); });
+    await expect(new BrowserProjectRepository().save({ ...sampleProject, id: "new" })).rejects.toThrow("quota");
+    expect((await new BrowserProjectRepository().load())?.id).toBe(sampleProject.id);
+  });
+
   it("keeps at most twenty recent snapshots", async () => {
     const repository = new BrowserProjectRepository();
 

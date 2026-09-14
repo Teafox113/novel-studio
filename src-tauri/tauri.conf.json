@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Novel Studio",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "identifier": "tw.novelstudio.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -55,4 +55,3 @@
     }
   }
 }
-

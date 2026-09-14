@@ -248,6 +248,8 @@ export interface ProjectRepository {
   readonly kind: "browser" | "sqlite";
   readonly label: string;
   load(): Promise<StoryProject | null>;
+  listProjects(): Promise<Array<{ id: string; title: string }>>;
+  loadProject(id: string): Promise<StoryProject | null>;
   save(project: StoryProject): Promise<void>;
   createSnapshot(project: StoryProject, label: string): Promise<void>;
   listSnapshots(projectId: string): Promise<ProjectSnapshot[]>;
