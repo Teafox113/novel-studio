@@ -89,6 +89,7 @@ export interface StoryEntity {
   summary: string;
   color: string;
   attributes: Record<string, string>;
+  characterSheet?: import("./characterSheet").CharacterSheet;
   createdAt: string;
   updatedAt: string;
 }
@@ -217,7 +218,7 @@ export interface AiFinding {
 }
 
 export interface StoryProject {
-  schemaVersion: 6 | 7;
+  schemaVersion: 6 | 7 | 8;
   fictionalHistory?: import("./fictionalHistory").FictionalHistory;
   id: string;
   title: string;

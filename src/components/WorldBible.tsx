@@ -1,3 +1,4 @@
+import { CharacterSheet } from "./CharacterSheet";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
@@ -291,6 +292,7 @@ export function WorldBible({
           </header>
 
           <div className="world-editor-scroll">
+            {selected.type === "character" && <CharacterSheet key={selected.id} entity={selected} project={project} onChange={characterSheet => onPatchEntity(selected.id, { characterSheet })} onOpenEntity={setSelectedId} onOpenScene={onOpenScene} />}
             <section className="world-form-section">
               <h2>基本資料</h2>
               <div className="world-fields two-columns">

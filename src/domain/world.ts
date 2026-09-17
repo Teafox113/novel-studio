@@ -13,11 +13,12 @@ export interface EntityBacklinks {
   researchIds: string[];
 }
 
-function searchableEntityText(entity: StoryEntity): string {
+function searchableEntityText(entity: StoryEntity, entities: StoryEntity[]): string {
   return [
     entity.name,
     entity.summary,
     ...entity.aliases,
+    ...(entity.characterSheet?.entries.flatMap(e => [entities.find(linked => linked.id === e.entityId)?.name ?? e.name, e.notes]) ?? []),
     ...Object.entries(entity.attributes).flat(),
   ]
     .join(" ")
@@ -33,7 +34,7 @@ export function filterWorldEntities(
   return entities.filter(
     (entity) =>
       (type === "all" || entity.type === type) &&
-      (!normalizedQuery || searchableEntityText(entity).includes(normalizedQuery)),
+      (!normalizedQuery || searchableEntityText(entity, entities).includes(normalizedQuery)),
   );
 }
 

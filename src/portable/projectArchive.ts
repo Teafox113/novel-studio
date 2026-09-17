@@ -159,7 +159,7 @@ function hasStringArray(value: unknown): value is string[] {
 export function validateStoryProject(value: unknown): StoryProject {
   if (
     !isRecord(value) ||
-    ![1, 2, 3, 4, 5, 6, 7].includes(Number(value.schemaVersion)) ||
+    ![1, 2, 3, 4, 5, 6, 7, 8].includes(Number(value.schemaVersion)) ||
     !isString(value.id) ||
     !isString(value.title) ||
     !isString(value.subtitle) ||

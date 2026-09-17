@@ -12,7 +12,7 @@ const labels: Record<string, string> = {
   title: "標題", subtitle: "副標題", author: "作者", synopsis: "摘要",
   plainText: "正文", content: "內容／格式", status: "狀態", parentId: "所屬資料夾",
   sortOrder: "排列順序", targetWords: "目標字數", name: "名稱", summary: "摘要",
-  dataUrl: "附件", notes: "筆記", attributes: "自訂屬性",
+  dataUrl: "附件", notes: "筆記", attributes: "自訂屬性", characterSheet: "人物狀態卡",
 };
 
 function display(value: unknown, key: string): string {

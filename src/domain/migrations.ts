@@ -1,3 +1,4 @@
+import { validateCharacterSheet } from "./characterSheet";
 import { defaultHistory, validateHistory } from "./fictionalHistory";
 import type {
   AiFinding,
@@ -109,6 +110,7 @@ export function migrateStoryProject(value: unknown): StoryProject {
     throw new Error("專案資料格式無法辨識。");
   }
 
+  if (Number(value.schemaVersion) > 8) throw new Error("此專案來自較新版本，請升級程式後再開啟。");
   const now = new Date().toISOString();
   const rawNodes = Array.isArray(value.nodes) ? value.nodes : [];
   const nodes = rawNodes.map((node) => ({ ...(node as ProjectNode) }));
@@ -119,6 +121,7 @@ export function migrateStoryProject(value: unknown): StoryProject {
       id: String(raw.id ?? crypto.randomUUID()),
       type: entityType(raw.type),
       name: String(raw.name ?? "未命名項目"),
+      characterSheet: raw.characterSheet === undefined ? undefined : validateCharacterSheet(raw.characterSheet),
       aliases: Array.isArray(raw.aliases) ? raw.aliases.map(String) : [],
       summary: String(raw.summary ?? ""),
       color: String(raw.color ?? "#8c96a8"),
@@ -353,7 +356,7 @@ export function migrateStoryProject(value: unknown): StoryProject {
     : [];
 
   return {
-    schemaVersion: 7,
+    schemaVersion: 8,
     fictionalHistory: value.fictionalHistory === undefined ? defaultHistory() : validateHistory(value.fictionalHistory),
     id: String(value.id ?? crypto.randomUUID()),
     title: String(value.title ?? "未命名小說"),
