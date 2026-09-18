@@ -18,6 +18,7 @@ import type {
 } from "../domain/models";
 
 interface BinderProps {
+  blockNumbers?: Record<string, string>;
   nodes: ProjectNode[];
   selectedId: string;
   inspirations: InspirationItem[];
@@ -36,7 +37,8 @@ function TreeBranch({
   selectedId,
   onSelect,
   depth = 0,
-}: Pick<BinderProps, "nodes" | "selectedId" | "onSelect"> & {
+  blockNumbers,
+}: Pick<BinderProps, "nodes" | "selectedId" | "onSelect" | "blockNumbers"> & {
   parentId: string | null;
   depth?: number;
 }) {
@@ -63,13 +65,14 @@ function TreeBranch({
                   <FileText size={14} />
                 </>
               )}
-              <span className="binder-title">{node.title}</span>
+              <span className="binder-title">{blockNumbers?.[node.id] ? `${blockNumbers[node.id]} ` : ""}{node.title}</span>
               {node.kind === "scene" && (
                 <span className={`status-dot status-${node.status}`} />
               )}
             </button>
             {children.length > 0 && (
               <TreeBranch
+                blockNumbers={blockNumbers}
                 nodes={nodes}
                 parentId={node.id}
                 selectedId={selectedId}
@@ -85,6 +88,7 @@ function TreeBranch({
 }
 
 export function Binder({
+  blockNumbers,
   nodes,
   selectedId,
   inspirations,
@@ -142,6 +146,7 @@ export function Binder({
         </div>
         <div className="binder-tree">
           <TreeBranch
+                blockNumbers={blockNumbers}
             nodes={nodes}
             parentId={null}
             selectedId={selectedInspirationId ? "" : selectedId}

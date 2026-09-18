@@ -1,3 +1,5 @@
+import { BranchEditor, InteractiveBookWorkspace } from "./components/InteractiveBook";
+import { blockNumber, syncBook } from "./domain/interactiveBook";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArchiveRestore,
@@ -87,6 +89,7 @@ import {
 
 type WorkspaceView = "editor" | "corkboard" | "outliner";
 type Section =
+  | "interactive"
   | "manuscript"
   | "world"
   | "timeline"
@@ -127,6 +130,7 @@ function timelineEventForScene(
 }
 
 const sectionItems = [
+  { id: "interactive" as const, label: "互動書籍", icon: ListTree },
   { id: "manuscript" as const, label: "手稿", icon: BookOpenText },
   { id: "world" as const, label: "世界觀", icon: Library },
   { id: "timeline" as const, label: "時間線", icon: Waypoints },
@@ -140,6 +144,7 @@ const moduleCopy: Record<
   Exclude<Section, "manuscript">,
   { eyebrow: string; title: string; description: string; items: string[] }
 > = {
+  interactive: { eyebrow: "INTERACTIVE BOOK", title: "互動書籍", description: "編號劇情塊與試讀", items: ["選項", "跳轉", "試讀"] },
   history: { eyebrow: "FICTIONAL HISTORY", title: "架空歷史一覽", description: "設定世界曆法與歷史年代。", items: ["曆法", "紀元", "歷史事件"] },
   world: {
     eyebrow: "WORLD BIBLE",
@@ -175,6 +180,15 @@ const moduleCopy: Record<
 
 function App() {
   const [project, setProject] = useState<StoryProject | null>(null);
+  useEffect(() => {
+    if (!project?.interactiveBook?.enabled) return;
+    setProject(current => {
+      if (!current?.interactiveBook?.enabled) return current;
+      const next = syncBook(current, current.interactiveBook);
+      return next === current.interactiveBook ? current : { ...current, interactiveBook: next };
+    });
+  }, [project?.nodes, project?.interactiveBook]);
+
   const [selectedId, setSelectedId] = useState("scene-1");
   const [selectedInspirationId, setSelectedInspirationId] = useState<
     string | null
@@ -1691,6 +1705,7 @@ function App() {
       {section === "manuscript" ? (
         <>
           <Binder
+            blockNumbers={project.interactiveBook?.enabled ? Object.fromEntries(project.interactiveBook.blocks.map(b => [b.sceneId, blockNumber(b.number)])) : undefined}
             nodes={project.nodes}
             selectedId={selectedId}
             inspirations={project.inspirations}
@@ -1854,6 +1869,7 @@ function App() {
                     content={selectedDocument.content}
                     onChange={updateDocument}
                   />
+                  {project.interactiveBook?.enabled && <BranchEditor key={selectedNode.id} project={project} sceneId={selectedNode.id} onChange={setProject} onOpenScene={openWorldScene} />}
                   <div className="editor-statusbar">
                     <span>{selectedNode.wordCount.toLocaleString()} 字</span>
                     <span>修訂 {selectedDocument.revision}</span>
@@ -1925,6 +1941,8 @@ function App() {
             onOpenResearch={openWorldResearch}
           />
         </main>
+      ) : section === "interactive" ? (
+        <main className="module-workspace"><InteractiveBookWorkspace key={project.id} project={project} onChange={setProject} onOpenScene={openWorldScene} /></main>
       ) : section === "history" ? (
         <main className="module-workspace"><FictionalHistoryWorkspace key={project.id} project={project} onChange={setProject} onOpenScene={openWorldScene} /></main>
       ) : section === "timeline" ? (

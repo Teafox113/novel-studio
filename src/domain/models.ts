@@ -218,7 +218,8 @@ export interface AiFinding {
 }
 
 export interface StoryProject {
-  schemaVersion: 6 | 7 | 8;
+  schemaVersion: 6 | 7 | 8 | 9;
+  interactiveBook?: import("./interactiveBook").InteractiveBook;
   fictionalHistory?: import("./fictionalHistory").FictionalHistory;
   id: string;
   title: string;

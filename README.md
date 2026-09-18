@@ -6,13 +6,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ## 下載並安裝（一般使用者）
 
-**目前版本：0.14.0 · Windows 10／11 x64**
+**目前版本：0.15.0 · Windows 10／11 x64**
 
 ### 推薦：下載安裝版
 
-**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.14.0/Novel-Studio-0.14.0-Windows-x64-Setup.exe)**
+**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.15.0/Novel-Studio-0.15.0-Windows-x64-Setup.exe)**
 
-1. 點上方連結，下載 `Novel-Studio-0.14.0-Windows-x64-Setup.exe`。
+1. 點上方連結，下載 `Novel-Studio-0.15.0-Windows-x64-Setup.exe`。
 2. 開啟下載的檔案，依安裝畫面指示完成安裝。
 3. 從 Windows 開始功能表開啟 **Novel Studio**，即可開始使用。
 
@@ -20,13 +20,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ### 不想安裝：下載免安裝版
 
-**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.14.0/Novel-Studio-0.14.0-Windows-x64-NoInstall.zip)**
+**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.15.0/Novel-Studio-0.15.0-Windows-x64-NoInstall.zip)**
 
 下載後按右鍵選「解壓縮全部」，再進入解壓後的資料夾，開啟 `Novel-Studio.exe`。請完整解壓後再執行。
 
 免安裝版需要 WebView2 Runtime；若電腦缺少此執行環境，可改用上方安裝版。**資料仍保存在 Windows 使用者目錄，不會跟著 ZIP 或 EXE 搬移**；安裝版與免安裝版共用本機資料，請勿同時開啟編輯。
 
-[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.14.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
+[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.15.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
 
 > 上方 GitHub 的「Code → Download ZIP」與 Releases 的「Source code」是原始碼。要直接使用軟體，請選本頁的 **安裝版 EXE** 或 **免安裝 ZIP**。
 
@@ -38,6 +38,10 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 4. 在「第一章」輸入正文，等右上角顯示 **「已儲存」**。
 
 想專心寫作可按「打字機」，按 `Esc` 返回；想保留一份檔案，使用「⋯ → 匯出專案」保存 `.novel` 備份。
+
+### 讓讀者選擇劇情
+
+左側開啟 **互動書籍 → 互動分支模式**。每個手稿場景會取得固定編號，新增選項後選擇跳往哪一塊，將最後一塊設為「在此結束」，即可從起點試讀並回退。也可在手稿正文下方直接編輯選項。[互動書籍操作指南](docs/INTERACTIVE_BOOK.md)
 
 ### 像遊戲一樣整理角色
 
@@ -61,6 +65,7 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 | --- | --- |
 | 寫作與編排 | 樹狀手稿、場景編輯、卡片牆、大綱表格、摘要、狀態與目標字數 |
 | 沉浸寫作 | 暖色紙張、深色書房、游標行跟隨、Esc 返回、四角參考浮窗與收合 |
+| 互動書籍 | 固定劇情塊編號、文字選項、目標跳轉、起點／結局與可回退試讀 |
 | 人物狀態卡 | 遊戲式關鍵字卡、身分／身體／背包／資訊／能力／數值、世界觀與來源連結 |
 | 世界觀管理 | 人物、地點、勢力、物品、設定、專有名詞、別名、屬性與關係 |
 | 架空歷史 | 自訂曆法、紀元、月份與週日，虛構日期排序及場景／世界觀連結 |

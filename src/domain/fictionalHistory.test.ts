@@ -29,7 +29,7 @@ describe("fictional chronology", () => {
     delete legacy.fictionalHistory;
     legacy.schemaVersion = 6;
     const migrated = migrateStoryProject(legacy);
-    expect(migrated.schemaVersion).toBe(8);
+    expect(migrated.schemaVersion).toBe(9);
     expect(migrated.fictionalHistory).toEqual(defaultHistory());
     migrated.fictionalHistory!.calendar.name = "王朝曆";
     migrated.fictionalHistory!.dates[migrated.timelineEvents[0].id] = { year: -12, month: 2, day: 9 };
