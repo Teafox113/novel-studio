@@ -63,7 +63,7 @@ describe("numbered interactive book", () => {
   it("preserves numbering and choices in archives, copies and snapshot comparison", () => {
     const { project, book } = fixture(); project.interactiveBook = book;
     const restored = parsePortableProject(serializePortableProject(project));
-    expect(restored.schemaVersion).toBe(9);
+    expect(restored.schemaVersion).toBe(10);
     expect(restored.interactiveBook).toEqual(book);
     const copy = duplicateProject(restored, "副本"); copy.interactiveBook!.enabled = false;
     expect(restored.interactiveBook!.enabled).toBe(true);

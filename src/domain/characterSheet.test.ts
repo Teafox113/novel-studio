@@ -12,7 +12,7 @@ describe("character profile persistence", () => {
     const p = structuredClone(sampleProject);
     p.entities[0].characterSheet = structuredClone(sheet);
     const restored = parsePortableProject(serializePortableProject(migrateStoryProject(p)));
-    expect(restored.schemaVersion).toBe(9);
+    expect(restored.schemaVersion).toBe(10);
     expect(restored.entities[0].characterSheet).toEqual(sheet);
     const copy = duplicateProject(restored, "副本");
     copy.entities[0].characterSheet!.entries[0].value = 2;

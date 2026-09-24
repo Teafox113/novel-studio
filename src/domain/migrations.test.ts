@@ -40,7 +40,7 @@ describe("migrateStoryProject", () => {
   it("upgrades text POV and location into stable entity links", () => {
     const migrated = migrateStoryProject(legacyProject);
 
-    expect(migrated.schemaVersion).toBe(9);
+    expect(migrated.schemaVersion).toBe(10);
     expect(migrated.researchItems.every((item) => Array.isArray(item.linkedInspirationIds))).toBe(true);
     expect(migrated.entities.map((entity) => entity.name)).toEqual([
       "古老旅人",

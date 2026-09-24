@@ -25,7 +25,7 @@ export function BranchEditor({ project, sceneId, onChange, onOpenScene }: Props 
   </section>;
 }
 
-export function InteractiveBookWorkspace({ project, onChange, onOpenScene }: Props) {
+export function InteractiveBookWorkspace({ project, onChange, onOpenScene, onOpenVariables }: Props & { onOpenVariables: () => void }) {
   const book = project.interactiveBook;
   const [selected, setSelected] = useState("");
   const [query, setQuery] = useState("");
@@ -40,6 +40,7 @@ export function InteractiveBookWorkspace({ project, onChange, onOpenScene }: Pro
   const start = () => { try { if (book) { setSession(startBook(project, book)); setError(""); setTab("read"); } } catch (e) { setError((e as Error).message); } };
   return <div className="interactive-workspace">
     <header className="interactive-header"><div><span className="eyebrow">INTERACTIVE BOOK</span><h1>互動書籍</h1><p>用編號連接劇情，寫完就能試讀。</p></div><label className="interactive-toggle"><input type="checkbox" checked={book?.enabled ?? false} onChange={e => { onChange(update(project, { ...syncBook(project, book ?? initialBook(project)), enabled: e.target.checked })); setSession(null); setError(""); }} />互動分支模式</label></header>
+    <button className="open-variable-library" onClick={onOpenVariables}>變數庫 · 待設定 {(project.writingVariables ?? []).filter(v => v.status === "pending").length}</button>
     {!book?.enabled ? <div className="interactive-empty"><h2>把故事寫成可以選擇的旅程</h2><p>開啟後，每個手稿場景會取得固定編號。在正文下方設定選項與目的地即可。</p><p>關閉模式只會隱藏設定，不會刪除分支或正文。</p></div> : <>
       <nav className="interactive-tabs"><button aria-pressed={tab === "plan"} onClick={() => setTab("plan")}>劇情塊與跳轉</button><button aria-pressed={tab === "read"} onClick={() => setTab("read")}>試讀</button><button disabled={issues.length > 0} onClick={start}>從起點開始試讀</button></nav>
       {error && <p role="alert">{error}</p>}

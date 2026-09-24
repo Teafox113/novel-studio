@@ -1,3 +1,5 @@
+import { VariableLibrary } from "./components/VariableLibrary";
+import { collectVariable } from "./domain/writingVariables";
 import { BranchEditor, InteractiveBookWorkspace } from "./components/InteractiveBook";
 import { blockNumber, syncBook } from "./domain/interactiveBook";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -179,6 +181,9 @@ const moduleCopy: Record<
 };
 
 function App() {
+  const [variableLibrary, setVariableLibrary] = useState<string | null>(null);
+  const [variableSource, setVariableSource] = useState("");
+  useEffect(() => { if (variableLibrary !== null) setVariableSource(""); }, [variableLibrary]);
   const [project, setProject] = useState<StoryProject | null>(null);
   useEffect(() => {
     if (!project?.interactiveBook?.enabled) return;
@@ -1862,6 +1867,15 @@ function App() {
                     />
                   </div>
                   <StoryEditor
+                    sceneId={selectedNode.id}
+                    variables={project.writingVariables ?? []}
+                    focusSourceId={variableSource}
+                    onOpenVariables={(id = "") => setVariableLibrary(id)}
+                    onCollectVariable={(name, source, existingId) => {
+                      const result = collectVariable(project.writingVariables ?? [], name, source, existingId);
+                      setProject(current => current ? { ...current, writingVariables: result.variables, updatedAt: new Date().toISOString() } : current);
+                      return result.variableId;
+                    }}
                     fontSize={editorFontSize}
                     onFontSizeChange={setEditorFontSize}
                     typewriter={focusMode}
@@ -1942,7 +1956,7 @@ function App() {
           />
         </main>
       ) : section === "interactive" ? (
-        <main className="module-workspace"><InteractiveBookWorkspace key={project.id} project={project} onChange={setProject} onOpenScene={openWorldScene} /></main>
+        <main className="module-workspace"><InteractiveBookWorkspace onOpenVariables={() => setVariableLibrary("")} key={project.id} project={project} onChange={setProject} onOpenScene={openWorldScene} /></main>
       ) : section === "history" ? (
         <main className="module-workspace"><FictionalHistoryWorkspace key={project.id} project={project} onChange={setProject} onOpenScene={openWorldScene} /></main>
       ) : section === "timeline" ? (
@@ -2043,6 +2057,7 @@ function App() {
           onCaptureFiles={captureQuickFiles}
         />
       )}
+      {variableLibrary !== null && <VariableLibrary key={`${project.id}:${variableLibrary}`} project={project} selectedId={variableLibrary} onClose={() => setVariableLibrary(null)} onSave={value => setProject(current => current ? { ...current, writingVariables: (current.writingVariables ?? []).map(v => v.id === value.id ? value : v), updatedAt: new Date().toISOString() } : current)} onOpenSource={(sceneId, sourceId) => { setVariableLibrary(null); setVariableSource(sourceId); openWorldScene(sceneId); }} />}
       {settingsOpen && (
         <AppearanceDialog
           uiFont={uiFont} editorFont={editorFont} onUiFont={setUiFont} onEditorFont={setEditorFont}

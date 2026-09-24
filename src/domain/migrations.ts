@@ -1,3 +1,4 @@
+import { validateWritingVariables } from "./writingVariables";
 import { validateInteractiveBook } from "./interactiveBook";
 import { validateCharacterSheet } from "./characterSheet";
 import { defaultHistory, validateHistory } from "./fictionalHistory";
@@ -111,7 +112,7 @@ export function migrateStoryProject(value: unknown): StoryProject {
     throw new Error("專案資料格式無法辨識。");
   }
 
-  if (Number(value.schemaVersion) > 9) throw new Error("此專案來自較新版本，請升級程式後再開啟。");
+  if (Number(value.schemaVersion) > 10) throw new Error("此專案來自較新版本，請升級程式後再開啟。");
   const now = new Date().toISOString();
   const rawNodes = Array.isArray(value.nodes) ? value.nodes : [];
   const nodes = rawNodes.map((node) => ({ ...(node as ProjectNode) }));
@@ -357,7 +358,8 @@ export function migrateStoryProject(value: unknown): StoryProject {
     : [];
 
   return {
-    schemaVersion: 9,
+    schemaVersion: 10,
+    writingVariables: value.writingVariables === undefined ? undefined : validateWritingVariables(value.writingVariables),
     interactiveBook: value.interactiveBook === undefined ? undefined : validateInteractiveBook(value.interactiveBook),
     fictionalHistory: value.fictionalHistory === undefined ? defaultHistory() : validateHistory(value.fictionalHistory),
     id: String(value.id ?? crypto.randomUUID()),
