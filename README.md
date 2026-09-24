@@ -2,7 +2,7 @@
 
 <img src="public/creator-avatar.png" alt="FloofyFox" width="64" />
 
-**FloofyFox · Novel Studio v0.16.1** · [製作人 GitHub](https://github.com/Teafox113) · 更新日期：2026-09-24
+**FloofyFox · Novel Studio v0.16.1** · [by floofyfox](https://github.com/Teafox113) · 更新日期：2026-09-24
 
 **讓手稿、人物、世界觀與研究資料，留在同一個創作空間。**
 
