@@ -1,8 +1,8 @@
 [package]
 name = "novel-studio"
-version = "0.16.0"
+version = "0.16.1"
 description = "A local-first long-form writing studio"
-authors = ["Fox"]
+authors = ["FloofyFox"]
 edition = "2021"
 
 [lib]
@@ -19,3 +19,6 @@ tauri = { version = "2", features = [] }
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }
+
+[package.metadata.tauri-winres]
+OriginalFilename = 'novel-studio.exe'

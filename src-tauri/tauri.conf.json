@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Novel Studio",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "identifier": "tw.novelstudio.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -30,7 +30,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "publisher": "Novel Studio Project",
+    "publisher": "FloofyFox",
     "shortDescription": "本機優先的長篇小說創作與管理工具",
     "icon": [
       "icons/32x32.png",
@@ -45,13 +45,22 @@
       },
       "nsis": {
         "installMode": "currentUser",
-        "languages": ["TradChinese", "English"]
+        "languages": [
+          "TradChinese",
+          "English"
+        ]
       }
+    },
+    "copyright": "Copyright (c) 2026 FloofyFox",
+    "resources": {
+      "../THIRD_PARTY_LICENSES.md": "THIRD_PARTY_LICENSES.md"
     }
   },
   "plugins": {
     "sql": {
-      "preload": ["sqlite:novel-studio.db"]
+      "preload": [
+        "sqlite:novel-studio.db"
+      ]
     }
   }
 }

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "displayName": "FloofyFox",
+  "githubUrl": "https://github.com/Teafox113",
+  "avatar": "../public/creator-avatar.png",
+  "creditFormat": "FloofyFox · {appName} v{version}",
+  "copyrightFormat": "Copyright (c) {year} FloofyFox",
+  "avatarRightsNote": "2026-09-12 使用者確認本人為此頭像的著作權持有人；可供其開發程式參考及使用，不需重複詢問相同素材的權利歸屬。",
+  "avatarRights": {
+    "status": "owner-confirmed",
+    "copyrightHolder": "FloofyFox",
+    "confirmedDate": "2026-09-12",
+    "source": "使用者於本專案對話明確確認",
+    "scope": "使用者旗下開發程式的創作者識別與發布資訊",
+    "sha256": "86568c67f20cc62100bc89e32f2c6463b4f20dd95f40945302cbfe05240f187d"
+  }
+}

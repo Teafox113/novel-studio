@@ -1,18 +1,22 @@
 # Novel Studio
 
+<img src="public/creator-avatar.png" alt="FloofyFox" width="64" />
+
+**FloofyFox · Novel Studio v0.16.1** · [製作人 GitHub](https://github.com/Teafox113) · 更新日期：2026-09-24
+
 **讓手稿、人物、世界觀與研究資料，留在同一個創作空間。**
 
 Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯器。從場景卡片、人物設定到雙軸時間線，協助作者方便整理故事架構以及隨時參考查閱設定；需要專心寫作時，可以切換打字機模式，進行沉浸式碼字，也可以讓參考資料留在角落。
 
 ## 下載並安裝（一般使用者）
 
-**目前版本：0.16.0 · Windows 10／11 x64**
+**目前版本：0.16.1 · Windows 10／11 x64**
 
 ### 推薦：下載安裝版
 
-**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.16.0/Novel-Studio-0.16.0-Windows-x64-Setup.exe)**
+**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.16.1/Novel-Studio-0.16.1-Windows-x64-Setup.exe)**
 
-1. 點上方連結，下載 `Novel-Studio-0.16.0-Windows-x64-Setup.exe`。
+1. 點上方連結，下載 `Novel-Studio-0.16.1-Windows-x64-Setup.exe`。
 2. 開啟下載的檔案，依安裝畫面指示完成安裝。
 3. 從 Windows 開始功能表開啟 **Novel Studio**，即可開始使用。
 
@@ -20,13 +24,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ### 不想安裝：下載免安裝版
 
-**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.16.0/Novel-Studio-0.16.0-Windows-x64-NoInstall.zip)**
+**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.16.1/Novel-Studio-0.16.1-Windows-x64-NoInstall.zip)**
 
 下載後按右鍵選「解壓縮全部」，再進入解壓後的資料夾，開啟 `Novel-Studio.exe`。請完整解壓後再執行。
 
 免安裝版需要 WebView2 Runtime；若電腦缺少此執行環境，可改用上方安裝版。**資料仍保存在 Windows 使用者目錄，不會跟著 ZIP 或 EXE 搬移**；安裝版與免安裝版共用本機資料，請勿同時開啟編輯。
 
-[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.16.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
+[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.16.1) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
 
 > 上方 GitHub 的「Code → Download ZIP」與 Releases 的「Source code」是原始碼。要直接使用軟體，請選本頁的 **安裝版 EXE** 或 **免安裝 ZIP**。
 
@@ -193,3 +197,11 @@ docs/             功能說明與路線圖
 ## 授權
 
 目前尚未指定開源授權，公開原始碼不等於授予任意使用、修改或再散布的許可。若有再利用需求，請先聯絡專案維護者。第三方依賴依各自授權條款使用。
+
+## 創作者與版本資訊
+
+製作人：[FloofyFox](https://github.com/Teafox113)。Copyright (c) 2026 FloofyFox。
+
+[完整更新紀錄](CHANGELOG.md) · [第三方函式庫、版本與授權](THIRD_PARTY_LICENSES.md)
+
+0.16.1 統一開發者資訊、程式關於面板與 Windows 發行資訊，並重新提供 EXE、MSI 與免安裝 ZIP。升級前請匯出 `.novel` 備份、關閉舊版，再執行新版安裝檔。
