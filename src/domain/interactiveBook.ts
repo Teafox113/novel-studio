@@ -1,7 +1,11 @@
 import type { StoryProject } from "./models";
 import { manuscriptScenes } from "./project";
 
-export interface BookChoice { id: string; text: string; targetId: string }
+export interface BookRule { variableId: string; operator: "eq" | "gte" | "lte" | "set" | "add"; value: number }
+export interface BookChoice { id: string; text: string; targetId: string; conditions?: BookRule[]; effects?: BookRule[] }
+function validRules(value: unknown, effect: boolean): boolean {
+  return value === undefined || (Array.isArray(value) && value.every(r => r && typeof r.variableId === "string" && Number.isFinite(r.value) && (effect ? ["set", "add"] : ["eq", "gte", "lte"]).includes(r.operator)));
+}
 export interface BookBlock {
   sceneId: string;
   number: number;
@@ -24,6 +28,7 @@ export function validateInteractiveBook(value: unknown): InteractiveBook {
     scenes.add(block.sceneId); numbers.add(block.number);
     for (const c of block.choices) {
       if (!c || typeof c.id !== "string" || !c.id || choices.has(c.id) || typeof c.text !== "string" || typeof c.targetId !== "string") return invalid();
+      if (!validRules(c.conditions, false) || !validRules(c.effects, true)) return invalid();
       choices.add(c.id);
     }
   }
@@ -56,6 +61,14 @@ export function bookProblems(project: StoryProject, book: InteractiveBook): Book
     if (b.mode === "choices") {
       if (!b.choices.length) add("請新增選項，或改成直接繼續／結局。");
       for (const c of b.choices) {
+        for (const [rules, effect] of [[c.conditions, false], [c.effects, true]] as const) {
+          if (!validRules(rules, effect)) { add("條件或變化格式不正確。"); continue; }
+          for (const r of rules ?? []) {
+            const v = project.writingVariables?.find(v => v.id === r.variableId);
+            if (!v || v.status !== "ready" || v.kind === "pending") add("選項引用的變數不存在或尚未完成設定。");
+            else if ((["knowledge", "state"].includes(v.kind) && (r.operator === "add" || ![0, 1].includes(r.value))) || (v.kind === "item" && (!Number.isSafeInteger(r.value) || (r.operator !== "add" && r.value < 0)))) add(`變數「${v.name}」的條件或變化數值不適用。`);
+          }
+        }
         if (!c.text.trim()) add("有選項尚未填寫文字。");
         if (!ids.has(c.targetId)) add(`選項「${c.text || "未命名"}」缺少有效目標。`);
       }
@@ -65,9 +78,9 @@ export function bookProblems(project: StoryProject, book: InteractiveBook): Book
 }
 
 export interface ReadBlock { sceneId: string; number: number; title: string; text: string; mode: BookBlock["mode"]; choices: BookChoice[] }
-export interface BookSession { blocks: ReadBlock[]; path: string[]; source: string }
+export interface BookSession { blocks: ReadBlock[]; path: string[]; source: string; variables: import("./writingVariables").WritingVariable[]; states: Record<string, number>[] }
 export function bookFingerprint(project: StoryProject, book: InteractiveBook): string {
-  return JSON.stringify([book, liveBlocks(project, book).map(b => {
+  return JSON.stringify([book, project.writingVariables, liveBlocks(project, book).map(b => {
     const n = project.nodes.find(n => n.id === b.sceneId)!;
     return [n.id, n.title, project.documents[n.documentId ?? ""]?.plainText ?? ""];
   })]);
@@ -79,14 +92,37 @@ export function startBook(project: StoryProject, book: InteractiveBook): BookSes
     const node = project.nodes.find(n => n.id === b.sceneId)!;
     return { sceneId: b.sceneId, number: b.number, title: node.title, text: project.documents[node.documentId ?? ""]?.plainText ?? "", mode: b.mode, choices: b.mode === "ending" ? [] : b.mode === "continue" ? [{ id: `continue:${b.sceneId}`, text: "繼續閱讀", targetId: b.targetId }] : structuredClone(b.choices) };
   });
-  return { blocks, path: [book.startId], source: bookFingerprint(project, book) };
+  const variables = structuredClone((project.writingVariables ?? []).filter(v => v.status === "ready" && v.kind !== "pending"));
+  return { blocks, path: [book.startId], source: bookFingerprint(project, book), variables, states: [Object.fromEntries(variables.map(v => [v.id, v.initial]))] };
 }
 export function chooseBook(session: BookSession, choiceId: string): BookSession {
   const current = session.blocks.find(b => b.sceneId === session.path.at(-1));
   const choice = current?.choices.find(c => c.id === choiceId);
   if (!choice || !session.blocks.some(b => b.sceneId === choice.targetId)) throw new Error("選項或目標不存在。");
-  return { ...session, path: [...session.path, choice.targetId] };
+  const reason = choiceUnavailable(session, choice);
+  if (reason) throw new Error(reason);
+  return { ...session, path: [...session.path, choice.targetId], states: [...session.states, applyChoice(session, choice)] };
 }
 export function backBook(session: BookSession): BookSession {
-  return session.path.length > 1 ? { ...session, path: session.path.slice(0, -1) } : session;
+  return session.path.length > 1 ? { ...session, path: session.path.slice(0, -1), states: session.states.slice(0, -1) } : session;
+}
+
+function applyChoice(session: BookSession, choice: BookChoice): Record<string, number> {
+  const state = { ...session.states.at(-1)! };
+  for (const r of choice.effects ?? []) {
+    const variable = session.variables.find(v => v.id === r.variableId);
+    if (!variable) throw new Error("變數不存在，請重新開始試讀。");
+    const value = r.operator === "add" ? state[r.variableId] + r.value : r.value;
+    if (!Number.isFinite(value) || (variable.kind === "item" && (!Number.isSafeInteger(value) || value < 0)) || (["knowledge", "state"].includes(variable.kind) && ![0, 1].includes(value))) throw new Error(`「${variable.name}」變化後的值無效或物品不足。`);
+    state[r.variableId] = value;
+  }
+  return state;
+}
+export function choiceUnavailable(session: BookSession, choice: BookChoice): string {
+  const state = session.states.at(-1)!;
+  for (const r of choice.conditions ?? []) {
+    const value = state[r.variableId];
+    if (value === undefined || !(r.operator === "eq" ? value === r.value : r.operator === "gte" ? value >= r.value : value <= r.value)) return "尚未符合條件";
+  }
+  try { applyChoice(session, choice); return ""; } catch (e) { return (e as Error).message; }
 }

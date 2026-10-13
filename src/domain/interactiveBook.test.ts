@@ -86,3 +86,46 @@ describe("numbered interactive book", () => {
     expect(book.blocks[0].choices).toHaveLength(2);
   });
 });
+
+describe("variable-driven choices", () => {
+  function setup() {
+    const f = fixture();
+    f.project.writingVariables = [{ id: "key", name: "鑰匙", kind: "item", ownerId: "", initial: 1, notes: "", status: "ready", sources: [] }];
+    f.a.choices[0].conditions = [{ variableId: "key", operator: "gte", value: 1 }];
+    f.a.choices[0].effects = [{ variableId: "key", operator: "add", value: -1 }];
+    return f;
+  }
+  it("consumes items atomically and restores values on back without editing the project", () => {
+    const { project, book, a } = setup(); a.choices[0].targetId = a.sceneId;
+    const first = startBook(project, book), next = chooseBook(first, "take");
+    expect(next.states.at(-1)?.key).toBe(0);
+    expect(() => chooseBook(next, "take")).toThrow("條件");
+    expect(backBook(next).states.at(-1)?.key).toBe(1);
+    expect(project.writingVariables![0].initial).toBe(1);
+    expect(chooseBook(backBook(next), "leave").states.at(-1)?.key).toBe(1);
+  });
+  it("rejects insufficient items even without a condition and never partially applies effects", () => {
+    const { project, book, a } = setup();
+    a.choices[0].conditions = [];
+    a.choices[0].effects!.push({ variableId: "key", operator: "add", value: -1 });
+    const session = startBook(project, book);
+    expect(() => chooseBook(session, "take")).toThrow("不足");
+    expect(session.states.at(-1)?.key).toBe(1);
+  });
+  it("blocks unfinished or deleted variables and invalid boolean effects", () => {
+    const { project, book, a } = setup();
+    project.writingVariables![0].status = "pending";
+    expect(() => startBook(project, book)).toThrow();
+    project.writingVariables![0].status = "ready";
+    project.writingVariables![0].kind = "knowledge";
+    expect(() => startBook(project, book)).toThrow();
+    a.choices[0].effects = [{ variableId: "key", operator: "set", value: 0 }];
+    expect(chooseBook(startBook(project, book), "take").states.at(-1)?.key).toBe(0);
+  });
+  it("preserves rules through archive export/import and rejects malformed rules", () => {
+    const { project, book, a } = setup(); project.interactiveBook = book;
+    expect(parsePortableProject(serializePortableProject(project)).interactiveBook).toEqual(book);
+    a.choices[0].effects![0].value = Infinity;
+    expect(() => validateInteractiveBook(book)).toThrow();
+  });
+});
