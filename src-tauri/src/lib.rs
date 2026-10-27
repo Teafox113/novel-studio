@@ -1,4 +1,5 @@
 use tauri_plugin_sql::{Migration, MigrationKind};
+mod folder_backup;
 
 const DATABASE_URL: &str = "sqlite:novel-studio.db";
 
@@ -44,6 +45,8 @@ pub fn run() {
     ];
 
     tauri::Builder::default()
+        .manage(folder_backup::BackupLock::default())
+        .invoke_handler(tauri::generate_handler![folder_backup::backup_config, folder_backup::backup_select, folder_backup::backup_disconnect, folder_backup::backup_write])
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(

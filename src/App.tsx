@@ -1,3 +1,4 @@
+import { FolderBackup } from "./components/FolderBackup";
 import { VariableLibrary } from "./components/VariableLibrary";
 import { collectVariable } from "./domain/writingVariables";
 import { BranchEditor, InteractiveBookWorkspace } from "./components/InteractiveBook";
@@ -225,6 +226,9 @@ function App() {
   const [snapshotNotice, setSnapshotNotice] = useState<string | null>(null);
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
   const [backupDialogOpen, setBackupDialogOpen] = useState(false);
+  const [folderBackupOpen, setFolderBackupOpen] = useState(false);
+  const [folderBackupProblem, setFolderBackupProblem] = useState(false);
+  const [savedForBackup, setSavedForBackup] = useState<StoryProject | null>(null);
   const [snapshots, setSnapshots] = useState<ProjectSnapshot[]>([]);
   const [operationBusy, setOperationBusy] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -293,19 +297,23 @@ function App() {
   useEffect(() => {
     if (!project || !hydrated.current || operationBusy) return;
     setSaveState("saving");
+    let cancelled = false;
     const timeout = window.setTimeout(async () => {
       try {
         await repository.save(project);
+        if (cancelled) return;
+        setSavedForBackup(project);
         setStorageError(null);
         setSaveState("saved");
       } catch (error: unknown) {
+        if (cancelled) return;
         setStorageError(
           error instanceof Error ? error.message : "專案資料儲存失敗。",
         );
         setSaveState("error");
       }
     }, 500);
-    return () => window.clearTimeout(timeout);
+    return () => { cancelled = true; window.clearTimeout(timeout); };
   }, [project, operationBusy]);
 
   useEffect(() => {
@@ -1641,12 +1649,12 @@ function App() {
             <button
               className="icon-button"
               title="專案與備份"
-              aria-label="開啟專案與備份選單"
+              aria-label={folderBackupProblem ? "開啟專案與備份選單（資料夾備份需要處理）" : "開啟專案與備份選單"}
               aria-expanded={transferMenuOpen}
               onClick={() => setTransferMenuOpen((open) => !open)}
               disabled={operationBusy}
             >
-              <MoreHorizontal size={18} />
+              {folderBackupProblem ? <AlertTriangle size={18} /> : <MoreHorizontal size={18} />}
             </button>
             {transferMenuOpen && (
               <div className="project-menu" role="menu">
@@ -1669,6 +1677,7 @@ function App() {
                     <small>從其他電腦接續作品</small>
                   </span>
                 </button>
+                <button role="menuitem" onClick={() => { setTransferMenuOpen(false); setFolderBackupOpen(true); }}><HardDrive size={17} /><span><strong>資料夾與同步備份{folderBackupProblem ? " · 需要處理" : ""}</strong><small>本機及 Google Drive 電腦版資料夾</small></span></button>
                 <button role="menuitem" onClick={openBackupDialog}>
                   <ArchiveRestore size={17} />
                   <span>
@@ -2033,6 +2042,7 @@ function App() {
         </div>
       )}
       {libraryOpen && <ProjectLibrary projects={libraryProjects} currentId={project.id} busy={operationBusy} error={libraryError} onClose={() => setLibraryOpen(false)} onCreate={(title, author) => changeProject(createBlankProject(title, author))} onCopy={title => changeProject(duplicateProject(project, title))} onOpen={changeProject} />}
+      <FolderBackup project={savedForBackup} canBackup={saveState === "saved" && savedForBackup?.id === project.id && !operationBusy} open={folderBackupOpen} onClose={() => setFolderBackupOpen(false)} onProblem={setFolderBackupProblem} />
       {backupDialogOpen && (
         <BackupDialog
           project={project}
