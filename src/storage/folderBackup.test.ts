@@ -36,6 +36,17 @@ describe("folder backup", () => {
     await runner.run(sampleProject, { local: "B", drive: null }, write, report, true);
     expect(write).toHaveBeenCalledTimes(3);
   });
+  it("keeps sticky notes in the recoverable backup", async () => {
+    const project = structuredClone(sampleProject);
+    project.inspirations.push({ id: "sticky-test", title: "伏筆", content: "最後一章揭曉", kind: "note", status: "inbox", linkedNodeIds: [], linkedEntityIds: [], createdAt: project.updatedAt, updatedAt: project.updatedAt });
+    const write = vi.fn(async (_slot: string, content: string) => {
+      const restored = parsePortableProject(content);
+      expect(restored.inspirations.find(n => n.id === "sticky-test")?.content).toBe("最後一章揭曉");
+      return "ok";
+    });
+    await new FolderBackupRunner().run(project, { local: "A", drive: "B" }, write, vi.fn());
+    expect(write).toHaveBeenCalledTimes(2);
+  });
   it("does not overlap automatic and manual runs", async () => {
     const runner = new FolderBackupRunner();
     let finish!: (name: string) => void;

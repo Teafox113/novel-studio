@@ -10,8 +10,13 @@ Copy-Item -LiteralPath (Join-Path $projectRoot "src-tauri/target/release/bundle/
 Copy-Item -LiteralPath (Join-Path $projectRoot 'src-tauri/target/release/novel-studio.exe') -Destination (Join-Path $portable 'Novel-Studio.exe')
 Copy-Item -LiteralPath (Join-Path $projectRoot 'docs/USER_GUIDE.md') -Destination (Join-Path $portable '使用說明.md')
 Copy-Item -LiteralPath (Join-Path $projectRoot "docs/RELEASE_$Version.md") -Destination (Join-Path $portable '更新紀錄.md')
-foreach ($guide in @('CHARACTER_PROFILE.md', 'FICTIONAL_HISTORY.md', 'INTERACTIVE_BOOK.md', 'WRITING_VARIABLES.md')) { Copy-Item -LiteralPath (Join-Path $projectRoot "docs/$guide") -Destination (Join-Path $portable $guide) }
+foreach ($guide in @('CHARACTER_PROFILE.md', 'FICTIONAL_HISTORY.md', 'INTERACTIVE_BOOK.md', 'WRITING_VARIABLES.md', 'STORAGE_AND_COMMERCIAL_PLAN.md')) { Copy-Item -LiteralPath (Join-Path $projectRoot "docs/$guide") -Destination (Join-Path $portable $guide) }
 foreach ($notice in @('README.md', 'CHANGELOG.md', 'THIRD_PARTY_LICENSES.md')) { Copy-Item -LiteralPath (Join-Path $projectRoot $notice) -Destination (Join-Path $portable $notice) }
-Compress-Archive -LiteralPath (Join-Path $portable 'README.md'), (Join-Path $portable 'CHANGELOG.md'), (Join-Path $portable 'THIRD_PARTY_LICENSES.md'), (Join-Path $portable 'Novel-Studio.exe'), (Join-Path $portable '使用說明.md'), (Join-Path $portable '更新紀錄.md'), (Join-Path $portable 'CHARACTER_PROFILE.md'), (Join-Path $portable 'FICTIONAL_HISTORY.md'), (Join-Path $portable 'INTERACTIVE_BOOK.md'), (Join-Path $portable 'WRITING_VARIABLES.md') -DestinationPath (Join-Path $destination "Novel-Studio-$Version-Windows-x64-NoInstall.zip") -Force
+$docsFolder = Join-Path $portable 'docs'
+$publicFolder = Join-Path $portable 'public'
+New-Item -ItemType Directory -Force $docsFolder, $publicFolder | Out-Null
+Get-ChildItem -LiteralPath (Join-Path $projectRoot 'docs') -File | Copy-Item -Destination $docsFolder
+Copy-Item -LiteralPath (Join-Path $projectRoot 'public/creator-avatar.png') -Destination $publicFolder
+Compress-Archive -LiteralPath $docsFolder, $publicFolder, (Join-Path $portable 'README.md'), (Join-Path $portable 'CHANGELOG.md'), (Join-Path $portable 'THIRD_PARTY_LICENSES.md'), (Join-Path $portable 'Novel-Studio.exe'), (Join-Path $portable '使用說明.md'), (Join-Path $portable '更新紀錄.md'), (Join-Path $portable 'CHARACTER_PROFILE.md'), (Join-Path $portable 'FICTIONAL_HISTORY.md'), (Join-Path $portable 'INTERACTIVE_BOOK.md'), (Join-Path $portable 'WRITING_VARIABLES.md'), (Join-Path $portable 'STORAGE_AND_COMMERCIAL_PLAN.md') -DestinationPath (Join-Path $destination "Novel-Studio-$Version-Windows-x64-NoInstall.zip") -Force
 Get-ChildItem -LiteralPath $destination -File | Where-Object Name -ne 'SHA256SUMS.txt' | ForEach-Object { '{0}  {1}' -f (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name } | Set-Content -Encoding utf8 (Join-Path $destination 'SHA256SUMS.txt')
 Write-Output "Packaged at $destination"

@@ -5375,3 +5375,17 @@ kbd {
 .folder-backup-destination h3 { margin-top: 0; }
 .folder-backup-dialog .backup-path, .folder-backup-dialog small { overflow-wrap: anywhere; }
 .folder-backup-dialog [role=alert] { color: #a53522; }
+
+.sticky-launch { position: fixed; bottom: 34px; right: 24px; z-index: 65; border: 1px solid #ccaf55; border-radius: 20px; padding: 10px 18px; background: #fff0ae; color: #51401c; box-shadow: 0 3px 15px #30251c20; cursor: pointer; }
+.sticky-notes { position: fixed; bottom: 34px; right: 24px; z-index: 65; width: min(340px, calc(100vw - 40px)); max-height: calc(100vh - 110px); overflow: auto; padding: 14px; border: 1px solid #d7bd70; border-radius: 10px; background: #fff5c9; box-shadow: 0 12px 40px #30251c30; color: #51401c; }
+.sticky-notes.sticky-left { right: auto; left: 76px; }
+.sticky-notes header, .sticky-tools { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.sticky-notes header strong { flex: 1; }
+.sticky-notes button { border: 1px solid #d7bd70; border-radius: 6px; padding: 5px 8px; background: #fff9e3; color: #51401c; cursor: pointer; white-space: nowrap; }
+.sticky-tools select { min-width: 0; flex: 1; }
+.sticky-notes input, .sticky-notes textarea, .sticky-notes select { border: 1px solid #ddc98e; border-radius: 5px; padding: 8px; color: #51401c; background: #fffbed; font: inherit; }
+.sticky-notes input, .sticky-notes textarea { display: block; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+.sticky-notes textarea { min-height: 160px; height: 220px; max-height: 45vh; resize: vertical; line-height: 1.8; }
+.sticky-notes footer { font-size: 12px; line-height: 1.6; }
+.sticky-notes small { display: block; margin-top: 4px; }
+@media(max-width: 600px) { .sticky-notes.sticky-left { left: 20px; } }

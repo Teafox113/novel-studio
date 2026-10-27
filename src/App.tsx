@@ -1,3 +1,4 @@
+import { StickyNotes } from "./components/StickyNotes";
 import { FolderBackup } from "./components/FolderBackup";
 import { VariableLibrary } from "./components/VariableLibrary";
 import { collectVariable } from "./domain/writingVariables";
@@ -2042,6 +2043,7 @@ function App() {
         </div>
       )}
       {libraryOpen && <ProjectLibrary projects={libraryProjects} currentId={project.id} busy={operationBusy} error={libraryError} onClose={() => setLibraryOpen(false)} onCreate={(title, author) => changeProject(createBlankProject(title, author))} onCopy={title => changeProject(duplicateProject(project, title))} onOpen={changeProject} />}
+      <StickyNotes key={project.id} notes={project.inspirations} saveState={saveState} onAdd={note => setProject(current => current ? { ...current, inspirations: [note, ...current.inspirations], updatedAt: note.updatedAt } : current)} onPatch={patchInspiration} />
       <FolderBackup project={savedForBackup} canBackup={saveState === "saved" && savedForBackup?.id === project.id && !operationBusy} open={folderBackupOpen} onClose={() => setFolderBackupOpen(false)} onProblem={setFolderBackupProblem} />
       {backupDialogOpen && (
         <BackupDialog
