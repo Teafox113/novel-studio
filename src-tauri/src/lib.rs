@@ -46,7 +46,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .manage(folder_backup::BackupLock::default())
-        .invoke_handler(tauri::generate_handler![folder_backup::backup_config, folder_backup::backup_select, folder_backup::backup_disconnect, folder_backup::backup_write])
+        .invoke_handler(tauri::generate_handler![folder_backup::backup_config, folder_backup::backup_select, folder_backup::backup_disconnect, folder_backup::backup_write, folder_backup::backup_list, folder_backup::backup_read])
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(

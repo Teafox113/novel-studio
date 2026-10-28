@@ -1,10 +1,11 @@
+import { BackupHistory } from "./BackupHistory";
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { StoryProject } from "../domain/models";
 import { isTauriRuntime } from "../storage/createProjectRepository";
 import { FolderBackupRunner, type BackupConfig, type BackupSlot, type BackupStatus } from "../storage/folderBackup";
 
-export function FolderBackup({ project, canBackup, open, onClose, onProblem }: { project: StoryProject | null; canBackup: boolean; open: boolean; onClose: () => void; onProblem: (problem: boolean) => void }) {
+export function FolderBackup({ project, canBackup, open, onClose, onProblem, onRestore, onPending }: { project: StoryProject | null; canBackup: boolean; open: boolean; onClose: () => void; onProblem: (problem: boolean) => void; onPending: (pending: boolean) => void; onRestore: (project: StoryProject, name: string) => Promise<boolean> }) {
   const desktop = isTauriRuntime();
   const [config, setConfig] = useState<BackupConfig>({ local: null, drive: null });
   const [status, setStatus] = useState<Partial<Record<BackupSlot, BackupStatus>>>({});
@@ -20,6 +21,7 @@ export function FolderBackup({ project, canBackup, open, onClose, onProblem }: {
     invoke<BackupConfig>("backup_config").then(c => { setConfig(c); setLoaded(true); }).catch(e => setError(String(e)));
   }, [desktop]);
   useEffect(() => { onProblem(!!error || Object.values(status).some(s => s?.error)); }, [error, status, onProblem]);
+  useEffect(() => { onPending(busy || !!error || runner.current.isPending(project, config)); }, [project, config, busy, status, error, onPending]);
   const run = async (force = false) => {
     const { project, config } = current.current;
     if (!desktop || !project || working.current) return;
@@ -60,6 +62,7 @@ export function FolderBackup({ project, canBackup, open, onClose, onProblem }: {
         {slot === "drive" && <p>先登入 Google Drive 電腦版，再選其同步範圍內的資料夾。此處不會驗證 Google 帳號或確認雲端上傳完成；離線可用性由 Drive 的串流／鏡像設定決定。</p>}
         <button disabled={busy || !loaded} onClick={() => void change(slot)}>選擇資料夾</button> <button disabled={busy || !config[slot]} onClick={() => void change(slot, true)}>停止此處備份</button>
         {status[slot] && <p role={status[slot]!.error ? "alert" : "status"}>{status[slot]!.projectTitle} · {status[slot]!.message}<br /><small>{status[slot]!.filename}</small></p>}
+        {config[slot] && <BackupHistory key={config[slot]} slot={slot} project={project} onRestore={onRestore} />}
       </section>)}
       <button disabled={busy || !loaded || !canBackup || !project || (!config.local && !config.drive)} onClick={() => void run(true)}>{busy ? "處理中…" : "立即備份到已選位置"}</button>
       {!canBackup && <p>目前作品尚未完成儲存，完成後即可手動備份。</p>}

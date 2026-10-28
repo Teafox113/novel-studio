@@ -20,7 +20,7 @@ export class BrowserProjectRepository implements ProjectRepository {
     try {
       return migrateStoryProject(JSON.parse(stored));
     } catch {
-      return null;
+      throw new Error("本機作品資料損壞，已停止自動載入以保留原始內容。請勿清除瀏覽器資料。");
     }
   }
 

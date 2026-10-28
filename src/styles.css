@@ -5389,3 +5389,9 @@ kbd {
 .sticky-notes footer { font-size: 12px; line-height: 1.6; }
 .sticky-notes small { display: block; margin-top: 4px; }
 @media(max-width: 600px) { .sticky-notes.sticky-left { left: 20px; } }
+
+.backup-history { margin-top: 16px; }
+.backup-history summary { cursor: pointer; padding: 8px 0; }
+.backup-history-list { max-height: 240px; overflow: auto; display: grid; gap: 8px; margin: 10px 0; }
+.backup-history-list button { text-align: left; overflow-wrap: anywhere; }
+.backup-history section { padding: 12px; border: 1px solid #d9ccba; border-radius: 8px; }

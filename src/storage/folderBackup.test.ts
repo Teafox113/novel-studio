@@ -47,6 +47,16 @@ describe("folder backup", () => {
     await new FolderBackupRunner().run(project, { local: "A", drive: "B" }, write, vi.fn());
     expect(write).toHaveBeenCalledTimes(2);
   });
+  it("keeps the close warning until every configured destination has the current revision", async () => {
+    const runner = new FolderBackupRunner(), config = { local: "A", drive: "B" };
+    expect(runner.isPending(sampleProject, config)).toBe(true);
+    await runner.run(sampleProject, config, async slot => { if (slot === "drive") throw new Error("offline"); return "ok"; }, vi.fn());
+    expect(runner.isPending(sampleProject, config)).toBe(true);
+    expect(runner.isPending(sampleProject, { local: "A", drive: null })).toBe(false);
+    await runner.run(sampleProject, config, async () => "ok", vi.fn());
+    expect(runner.isPending(sampleProject, config)).toBe(false);
+    expect(runner.isPending({ ...sampleProject, title: "changed" }, config)).toBe(true);
+  });
   it("does not overlap automatic and manual runs", async () => {
     const runner = new FolderBackupRunner();
     let finish!: (name: string) => void;

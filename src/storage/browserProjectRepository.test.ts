@@ -30,6 +30,13 @@ describe("BrowserProjectRepository", () => {
     vi.unstubAllGlobals();
   });
 
+  it("does not treat corrupted saved content as an empty project", async () => {
+    storage.setItem("novel-studio.project.v1", "{broken");
+    const repo = new BrowserProjectRepository();
+    await expect(repo.load()).rejects.toThrow("資料損壞");
+    await expect(repo.save(sampleProject)).rejects.toThrow();
+    expect(storage.getItem("novel-studio.project.v1")).toBe("{broken");
+  });
   it("round-trips the active project", async () => {
     const repository = new BrowserProjectRepository();
     await repository.save(sampleProject);

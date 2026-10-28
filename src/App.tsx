@@ -1,3 +1,4 @@
+import { useCloseGuard } from "./storage/useCloseGuard";
 import { StickyNotes } from "./components/StickyNotes";
 import { FolderBackup } from "./components/FolderBackup";
 import { VariableLibrary } from "./components/VariableLibrary";
@@ -230,6 +231,8 @@ function App() {
   const [folderBackupOpen, setFolderBackupOpen] = useState(false);
   const [folderBackupProblem, setFolderBackupProblem] = useState(false);
   const [savedForBackup, setSavedForBackup] = useState<StoryProject | null>(null);
+  const [folderBackupPending, setFolderBackupPending] = useState(false);
+  useCloseGuard(!!project && (project !== savedForBackup || saveState !== "saved"), folderBackupPending);
   const [snapshots, setSnapshots] = useState<ProjectSnapshot[]>([]);
   const [operationBusy, setOperationBusy] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -254,15 +257,18 @@ function App() {
   const hydrated = useRef(false);
 
   useEffect(() => {
+    let active = true;
     repository
       .load()
       .then((storedProject) => {
+        if (!active) return;
         setProject(storedProject ?? structuredClone(sampleProject));
         hydrated.current = true;
         if (storedProject) {
           void repository
             .listSnapshots(storedProject.id)
             .then(async (storedSnapshots) => {
+              if (!active) return;
               const latestAutomatic = storedSnapshots.find((snapshot) =>
                 snapshot.label.startsWith("自動備份"),
               );
@@ -287,12 +293,14 @@ function App() {
         }
       })
       .catch((error: unknown) => {
+        if (!active) return;
         const message =
           error instanceof Error ? error.message : "無法開啟本機專案資料庫。";
         setStorageError(message);
         setSaveState("error");
         setProject(structuredClone(sampleProject));
       });
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -1555,7 +1563,7 @@ function App() {
     const confirmed = window.confirm(
       `要還原「${snapshot.label}」嗎？\n\n目前內容也會先建立一份安全備份。`,
     );
-    if (!confirmed) return;
+    if (!confirmed) return false;
 
     setOperationBusy(true);
     try {
@@ -1570,14 +1578,18 @@ function App() {
       setSelectedId(firstScene?.id ?? snapshot.project.nodes[0]?.id ?? "");
       setSelectedInspirationId(null);
       setBackupDialogOpen(false);
+      setFolderBackupOpen(false);
+      setSection("manuscript"); setView("editor"); setFocusMode(false);
       setStorageError(null);
       setSaveState("saved");
       showNotice(`已還原 ${snapshot.label}`);
+      return true;
     } catch (error: unknown) {
       setStorageError(
         error instanceof Error ? error.message : "備份還原失敗。",
       );
       setSaveState("error");
+      return false;
     } finally {
       setOperationBusy(false);
     }
@@ -2043,8 +2055,8 @@ function App() {
         </div>
       )}
       {libraryOpen && <ProjectLibrary projects={libraryProjects} currentId={project.id} busy={operationBusy} error={libraryError} onClose={() => setLibraryOpen(false)} onCreate={(title, author) => changeProject(createBlankProject(title, author))} onCopy={title => changeProject(duplicateProject(project, title))} onOpen={changeProject} />}
-      <StickyNotes key={project.id} notes={project.inspirations} saveState={saveState} onAdd={note => setProject(current => current ? { ...current, inspirations: [note, ...current.inspirations], updatedAt: note.updatedAt } : current)} onPatch={patchInspiration} />
-      <FolderBackup project={savedForBackup} canBackup={saveState === "saved" && savedForBackup?.id === project.id && !operationBusy} open={folderBackupOpen} onClose={() => setFolderBackupOpen(false)} onProblem={setFolderBackupProblem} />
+      <StickyNotes projectId={project.id} key={project.id} notes={project.inspirations} saveState={saveState} onAdd={note => setProject(current => current ? { ...current, inspirations: [note, ...current.inspirations], updatedAt: note.updatedAt } : current)} onPatch={patchInspiration} />
+      <FolderBackup project={savedForBackup} canBackup={saveState === "saved" && savedForBackup?.id === project.id && !operationBusy} open={folderBackupOpen} onClose={() => setFolderBackupOpen(false)} onProblem={setFolderBackupProblem} onPending={setFolderBackupPending} onRestore={(restored, name) => restoreSnapshot({ id: crypto.randomUUID(), projectId: restored.id, project: restored, label: name, createdAt: new Date().toISOString() })} />
       {backupDialogOpen && (
         <BackupDialog
           project={project}

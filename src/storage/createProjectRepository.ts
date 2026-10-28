@@ -1,3 +1,4 @@
+import { serializedRepository } from "./serializedRepository";
 import type { ProjectRepository } from "../domain/models";
 import { BrowserProjectRepository } from "./browserProjectRepository";
 import { TauriProjectRepository } from "./tauriProjectRepository";
@@ -7,7 +8,7 @@ export function isTauriRuntime(): boolean {
 }
 
 export function createProjectRepository(): ProjectRepository {
-  return isTauriRuntime()
+  return serializedRepository(isTauriRuntime()
     ? new TauriProjectRepository()
-    : new BrowserProjectRepository();
+    : new BrowserProjectRepository());
 }

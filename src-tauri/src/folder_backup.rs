@@ -111,6 +111,11 @@ mod tests {
         let first = write_snapshot(&dir, data).unwrap();
         let second = write_snapshot(&dir, data).unwrap();
         assert_ne!(first, second);
+        assert_eq!(list_backups(&dir).unwrap().len(), 2);
+        assert!(safe_backup_path(&dir, "../outside.novel").is_err());
+        assert!(safe_backup_path(&dir, "Novel-file.novel:stream").is_err());
+        assert_eq!(safe_backup_path(&dir, &first).unwrap(), dir.join(&first).canonicalize().unwrap());
+
         assert_eq!(fs::read_to_string(dir.join(&first)).unwrap(), data);
         assert_eq!(fs::read_dir(&dir).unwrap().count(), 2);
         assert!(write_snapshot(&dir, "{}").is_err());
@@ -119,4 +124,44 @@ mod tests {
         fs::remove_file(dir.join(second)).unwrap();
         fs::remove_dir(dir).unwrap();
     }
+}
+
+#[derive(Serialize)]
+pub struct BackupEntry { name: String, modified: u64, size: u64 }
+fn safe_backup_path(folder: &Path, name: &str) -> Result<PathBuf, String> {
+    if !name.starts_with("Novel-") || !name.ends_with(".novel") || name.contains(['/', '\\', ':']) || name.contains("..") { return Err("無效的備份檔名".into()); }
+    let root = folder.canonicalize().map_err(|e| e.to_string())?;
+    let path = folder.join(name).canonicalize().map_err(|e| e.to_string())?;
+    if path.parent() != Some(root.as_path()) || !path.is_file() { return Err("備份必須位於已選資料夾內".into()); }
+    Ok(path)
+}
+fn list_backups(folder: &Path) -> Result<Vec<BackupEntry>, String> {
+    let mut entries = Vec::new();
+    for item in fs::read_dir(folder).map_err(|e| e.to_string())? {
+        let item = item.map_err(|e| e.to_string())?;
+        let name = item.file_name().to_string_lossy().into_owned();
+        if let Ok(path) = safe_backup_path(folder, &name) {
+            let m = path.metadata().map_err(|e| e.to_string())?;
+            entries.push(BackupEntry { name, size: m.len(), modified: m.modified().ok().and_then(|t| t.duration_since(UNIX_EPOCH).ok()).map(|t| t.as_secs()).unwrap_or(0) });
+        }
+    }
+    entries.sort_by(|a,b| b.modified.cmp(&a.modified).then_with(|| b.name.cmp(&a.name)));
+    entries.truncate(200);
+    Ok(entries)
+}
+fn selected_folder(app: &tauri::AppHandle, slot: &str) -> Result<PathBuf, String> {
+    let config = load(app)?;
+    match slot { "local" => config.local, "drive" => config.drive, _ => None }.ok_or("尚未設定備份位置".into())
+}
+#[tauri::command]
+pub async fn backup_list(app: tauri::AppHandle, slot: String) -> Result<Vec<BackupEntry>, String> {
+    tauri::async_runtime::spawn_blocking(move || list_backups(&selected_folder(&app, &slot)?)).await.map_err(|e| e.to_string())?
+}
+#[tauri::command]
+pub async fn backup_read(app: tauri::AppHandle, slot: String, name: String) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let path = safe_backup_path(&selected_folder(&app, &slot)?, &name)?;
+        if path.metadata().map_err(|e| e.to_string())?.len() > 256 * 1024 * 1024 { return Err("此備份超過 256 MB，請使用匯入專案。".into()); }
+        fs::read_to_string(path).map_err(|e| e.to_string())
+    }).await.map_err(|e| e.to_string())?
 }

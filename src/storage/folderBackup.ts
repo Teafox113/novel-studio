@@ -10,6 +10,11 @@ export type BackupWriter = (slot: BackupSlot, content: string) => Promise<string
 export class FolderBackupRunner {
   private completed = new Map<string, string>();
   private running = false;
+  isPending(project: StoryProject | null, config: BackupConfig): boolean {
+    if (!project) return false;
+    const fingerprint = JSON.stringify(project);
+    return (["local", "drive"] as const).some(slot => config[slot] && this.completed.get(`${slot}:${config[slot]}:${project.id}`) !== fingerprint);
+  }
   async run(project: StoryProject, config: BackupConfig, write: BackupWriter, report: (slot: BackupSlot, status: BackupStatus) => void, force = false): Promise<void> {
     if (this.running) return;
     this.running = true;

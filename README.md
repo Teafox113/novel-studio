@@ -2,31 +2,31 @@
 
 <img src="public/creator-avatar.png" alt="FloofyFox" width="64" />
 
-**FloofyFox · Novel Studio v0.17.0** · [by floofyfox](https://github.com/Teafox113) · 更新日期：2026-10-27
+**FloofyFox · Novel Studio v0.18.0** · [by floofyfox](https://github.com/Teafox113) · 更新日期：2026-10-28
 
 **讓手稿、人物、世界觀與研究資料，留在同一個創作空間。**
 
 Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯器。從場景卡片、人物設定到雙軸時間線，協助作者方便整理故事架構以及隨時參考查閱設定；需要專心寫作時，可以切換打字機模式，進行沉浸式碼字，也可以讓參考資料留在角落。
 
-## 最新更新 · v0.17.0
+## 最新更新 · v0.18.0
 
-2026-10-27
+2026-10-28
 
-- **隨手便條紙**：多張便條、左右停靠、收合與自動儲存，隨作品一起備份。
-- **雙位置備份**：自選本機與 Google Drive 電腦版資料夾，可同時保留完整版本並分別重試。
-- **互動試讀運算**：選項條件、物品消耗與數值變化，回退同步恢復狀態。
+- **安全還原**：資料夾備份歷史、作品與差異預覽，還原前先建立安全快照。
+- **資料保護**：儲存與還原依序執行；未儲存或未完成資料夾備份時提供離開提示。
+- **便條紙改善**：回收區與復原、記住位置與收合狀態，支援 `Ctrl+Shift+N`。
 
-[查看完整更新紀錄](CHANGELOG.md) · [前往本版下載](https://github.com/Teafox113/novel-studio/releases/tag/v0.17.0)
+[查看完整更新紀錄](CHANGELOG.md) · [前往本版下載](https://github.com/Teafox113/novel-studio/releases/tag/v0.18.0)
 
 ## 下載並安裝（一般使用者）
 
-**目前版本：0.17.0 · Windows 10／11 x64**
+**目前版本：0.18.0 · Windows 10／11 x64**
 
 ### 推薦：下載安裝版
 
-**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.17.0/Novel-Studio-0.17.0-Windows-x64-Setup.exe)**
+**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.18.0/Novel-Studio-0.18.0-Windows-x64-Setup.exe)**
 
-1. 點上方連結，下載 `Novel-Studio-0.17.0-Windows-x64-Setup.exe`。
+1. 點上方連結，下載 `Novel-Studio-0.18.0-Windows-x64-Setup.exe`。
 2. 開啟下載的檔案，依安裝畫面指示完成安裝。
 3. 從 Windows 開始功能表開啟 **Novel Studio**，即可開始使用。
 
@@ -34,13 +34,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ### 不想安裝：下載免安裝版
 
-**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.17.0/Novel-Studio-0.17.0-Windows-x64-NoInstall.zip)**
+**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.18.0/Novel-Studio-0.18.0-Windows-x64-NoInstall.zip)**
 
 下載後按右鍵選「解壓縮全部」，再進入解壓後的資料夾，開啟 `Novel-Studio.exe`。請完整解壓後再執行。
 
 免安裝版需要 WebView2 Runtime；若電腦缺少此執行環境，可改用上方安裝版。**資料仍保存在 Windows 使用者目錄，不會跟著 ZIP 或 EXE 搬移**；安裝版與免安裝版共用本機資料，請勿同時開啟編輯。
 
-[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.17.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
+[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.18.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
 
 > 上方 GitHub 的「Code → Download ZIP」與 Releases 的「Source code」是原始碼。要直接使用軟體，請選本頁的 **安裝版 EXE** 或 **免安裝 ZIP**。
 
@@ -55,13 +55,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ### 隨手開啟便條紙
 
-點右下角 **便條紙**，可新增多張、修改標題、切換、移到左／右側及收合。內容隨作品自動儲存，關閉只隱藏便條；也能在手稿靈感清單找到。請等「已儲存於本作品」再退出。
+點右下角 **便條紙**，可新增多張、修改標題、切換、移到左／右側及收合。內容隨作品自動儲存，關閉只隱藏便條；也能在手稿靈感清單找到。請等「已儲存於本作品」再退出。可用 `Ctrl+Shift+N` 開啟／關閉；移到回收區後可以復原。位置、收合狀態與選取便條會在這台裝置上依作品記住。
 
 ### 同時備份到本機與 Google Drive
 
 開啟 **「⋯ → 資料夾與同步備份」**，分別選擇本機資料夾與 Google Drive 電腦版中的資料夾，可只啟用一處或兩處同時備份。選定後先備份一版，之後每分鐘檢查已儲存的變更，也可按「立即備份」。每次新增 `.novel` 版本，不覆寫舊備份。
 
-**Drive 電腦版負責雲端上傳**，請在該程式確認同步完成；Novel Studio 尚未直接提供 Google 登入或雙向合併。還原請用「匯入專案」選取備份檔。[備份說明與限制](docs/STORAGE_AND_COMMERCIAL_PLAN.md)
+**Drive 電腦版負責雲端上傳**，請在該程式確認同步完成；Novel Studio 尚未直接提供 Google 登入或雙向合併。可展開「備份歷史與還原預覽」讀取最近 200 份備份，預覽作品及差異後還原；目前作品會先建立安全快照。也可用「匯入專案」選取備份檔。[備份說明與限制](docs/STORAGE_AND_COMMERCIAL_PLAN.md)
 
 ### 寫到關鍵詞，先收集再設定
 
@@ -224,4 +224,4 @@ docs/             功能說明與路線圖
 
 [完整更新紀錄](CHANGELOG.md) · [第三方函式庫、版本與授權](THIRD_PARTY_LICENSES.md)
 
-0.17.0 新增便條紙、雙資料夾備份與互動試讀變數運算，提供 EXE、MSI 與免安裝 ZIP。升級前請匯出 `.novel` 備份、關閉舊版，再執行新版安裝檔。
+0.18.0 改善備份預覽與安全還原、關閉提示及便條紙回收操作，提供 EXE、MSI 與免安裝 ZIP。升級前請匯出 `.novel` 備份、關閉舊版，再執行新版安裝檔。
