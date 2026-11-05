@@ -5395,3 +5395,13 @@ kbd {
 .backup-history-list { max-height: 240px; overflow: auto; display: grid; gap: 8px; margin: 10px 0; }
 .backup-history-list button { text-align: left; overflow-wrap: anywhere; }
 .backup-history section { padding: 12px; border: 1px solid #d9ccba; border-radius: 8px; }
+
+.story-editor .story-prose, .typewriter-mode .story-editor .story-prose { line-height: var(--writing-line-height, 2); }
+.writing-comfort { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 10px; padding: 8px 18px; color: #6b6255; font-size: 13px; border-bottom: 1px solid #e5dfd3; }
+.writing-comfort summary { cursor: pointer; padding: 4px; }
+.writing-comfort details { max-width: 100%; }
+.writing-comfort label { display: inline-flex; align-items: center; gap: 8px; margin: 8px 14px 8px 0; }
+.writing-comfort select { padding: 5px 8px; border: 1px solid #cfc6b6; border-radius: 5px; background: #fffaf2; color: #534b40; }
+.writing-comfort small { display: block; line-height: 1.8; }
+.format-toolbar button:focus-visible, .writing-comfort summary:focus-visible { outline: 2px solid #927146; outline-offset: 3px; }
+.format-toolbar button:disabled { opacity: .35; cursor: default; }

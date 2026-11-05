@@ -1,9 +1,10 @@
+import { countWords } from "../domain/project";
 import { Mark } from "@tiptap/core";
 import { createPortal } from "react-dom";
 import type { WritingVariable, VariableSource } from "../domain/writingVariables";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   Bold,
   Heading2,
@@ -48,6 +49,9 @@ export function StoryEditor({
   const [notice, setNotice] = useState("");
   const [linkQuery, setLinkQuery] = useState("");
   const [showMarks, setShowMarks] = useState(true);
+  const [lineHeight, setLineHeight] = useState(() => { try { const v = Number(localStorage.getItem("novel-studio:line-height")); return [1.6, 1.8, 2, 2.3, 2.6].includes(v) ? v : 2; } catch { return 2; } });
+  const [spellcheck, setSpellcheck] = useState(() => { try { return localStorage.getItem("novel-studio:spellcheck") !== "false"; } catch { return true; } });
+  const [selectedWords, setSelectedWords] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const editor = useEditor(
     {
@@ -56,8 +60,15 @@ export function StoryEditor({
       editorProps: {
         attributes: {
           class: "story-prose",
-          spellcheck: "true",
+          spellcheck: String(spellcheck),
+          role: "textbox",
+          "aria-label": "小說正文",
+          "aria-multiline": "true",
         },
+      },
+      onSelectionUpdate: ({ editor: currentEditor }) => {
+        const { from, to } = currentEditor.state.selection;
+        setSelectedWords(countWords(currentEditor.state.doc.textBetween(from, to, " ")));
       },
       onUpdate: ({ editor: currentEditor }) => {
         onChange(
@@ -70,12 +81,17 @@ export function StoryEditor({
   );
 
   useEffect(() => {
+    try { localStorage.setItem("novel-studio:line-height", String(lineHeight)); localStorage.setItem("novel-studio:spellcheck", String(spellcheck)); } catch { /* Optional display settings must not interrupt writing. */ }
+    editor?.view.dom.setAttribute("spellcheck", String(spellcheck));
+  }, [editor, lineHeight, spellcheck]);
+
+  useEffect(() => {
     if (!editor || !typewriter) return;
     let frame = 0;
     const center = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        if (editor.isDestroyed || !editor.isFocused || editor.view.composing) return;
+        if (editor.isDestroyed || !editor.isFocused || editor.view.composing || !editor.state.selection.empty) return;
         const scroller = editor.view.dom.closest(".editor-view");
         if (!scroller) return;
         const caret = editor.view.coordsAtPos(editor.state.selection.head);
@@ -101,7 +117,7 @@ export function StoryEditor({
     if (!menu) return;
     menuRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
     const close = (e: PointerEvent) => { if (!menuRef.current?.contains(e.target as Node)) setMenu(null); };
-    const escape = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setMenu(null); editor?.commands.focus(); } };
+    const escape = (e: KeyboardEvent) => { if (e.key === "Escape" && !e.isComposing) { e.preventDefault(); e.stopPropagation(); setMenu(null); editor?.commands.focus(); } };
     document.addEventListener("pointerdown", close); document.addEventListener("keydown", escape);
     return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("keydown", escape); };
   }, [menu, editor]);
@@ -187,18 +203,22 @@ export function StoryEditor({
   ];
 
   return (
-    <div className={`story-editor ${showMarks ? "show-variable-marks" : ""}`} onContextMenu={e => { if ((e.target as HTMLElement).closest(".story-prose") && openMenu(e.clientX, e.clientY)) e.preventDefault(); }} onKeyDown={e => { if (e.shiftKey && e.key === "F10") { const c = editor.view.coordsAtPos(editor.state.selection.from); if(openMenu(c.left, c.bottom)) e.preventDefault(); } }}>
+    <div style={{ "--writing-line-height": lineHeight } as CSSProperties} className={`story-editor ${showMarks ? "show-variable-marks" : ""}`} onContextMenu={e => { if ((e.target as HTMLElement).closest(".story-prose") && openMenu(e.clientX, e.clientY)) e.preventDefault(); }} onKeyDown={e => { if (!e.nativeEvent.isComposing && e.shiftKey && e.key === "F10") { const c = editor.view.coordsAtPos(editor.state.selection.from); if(openMenu(c.left, c.bottom)) e.preventDefault(); } }}>
       <div className="variable-capture-tools"><button onClick={() => onOpenVariables()}>變數庫（待設定 {variables.filter(v => v.status === "pending").length}）</button><label><input type="checkbox" checked={showMarks} onChange={e => setShowMarks(e.target.checked)} />顯示變數標記</label><span role="status">{notice}</span></div>
       <label className="manuscript-size-control">正文字級
         <select aria-label="寫作區正文字級" value={fontSize} onChange={e => onFontSizeChange(Number(e.target.value))}>{Array.from({ length: 22 }, (_, i) => i + 15).map(size => <option key={size} value={size}>{size}px</option>)}</select>
       </label>
-      <div className="format-toolbar">
+      <div className="writing-comfort"><details><summary>書寫設定</summary><label>行距<select aria-label="正文行距" value={lineHeight} onChange={e => setLineHeight(Number(e.target.value))}>{[1.6, 1.8, 2, 2.3, 2.6].map(v => <option key={v} value={v}>{v} 倍</option>)}</select></label><label><input type="checkbox" checked={spellcheck} onChange={e => setSpellcheck(e.target.checked)} />拼字檢查</label><small>僅調整閱讀顯示，不改變匯出格式。Ctrl+B 粗體 · Ctrl+I 斜體 · Ctrl+Z 復原 · Ctrl+Shift+V 純文字貼上</small></details><span>{selectedWords > 0 ? `已選取 ${selectedWords} 字／詞` : "中文按字、英文按詞計數"}</span></div>
+      <div className="format-toolbar" role="toolbar" aria-label="正文格式">
         {tools.map(({ label, icon: Icon, active, action }, index) => (
           <button
             key={label}
             className={`${active ? "active" : ""} ${index === 2 ? "tool-separator" : ""}`}
-            title={label}
+            title={label + ({ 復原: " · Ctrl+Z", 重做: " · Ctrl+Shift+Z", 粗體: " · Ctrl+B", 斜體: " · Ctrl+I" }[label] ?? "")}
             aria-label={label}
+            aria-pressed={index >= 2 ? active : undefined}
+            disabled={index === 0 ? !editor.can().undo() : index === 1 ? !editor.can().redo() : false}
+            onMouseDown={e => e.preventDefault()}
             onClick={action}
             type="button"
           >

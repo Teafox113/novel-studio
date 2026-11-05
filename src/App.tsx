@@ -218,7 +218,7 @@ function App() {
   useEffect(() => {
     if (!focusMode) return;
     const exit = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !event.isComposing) setFocusMode(false);
+      if (event.key === "Escape" && !event.isComposing && !event.defaultPrevented) setFocusMode(false);
     };
     window.addEventListener("keydown", exit);
     return () => window.removeEventListener("keydown", exit);
@@ -327,6 +327,7 @@ function App() {
 
   useEffect(() => {
     const openProjectSearch = (event: KeyboardEvent) => {
+      if (event.isComposing || event.keyCode === 229) return;
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setSearchOpen(true);
