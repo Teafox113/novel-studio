@@ -20,6 +20,28 @@
   --editor-font-size: 18px;
 }
 
+.browser-capture-import { width: min(760px, calc((100vw - 32px) / var(--ui-zoom, 1))); max-height: calc((100vh - 40px) / var(--ui-zoom, 1)); overflow: auto; border: 1px solid var(--line); border-radius: 16px; padding: 24px; background: var(--paper); color: var(--ink); box-shadow: var(--shadow); font-size: 16px; }
+.browser-capture-import::backdrop { background: #18213588; }
+.browser-capture-import header, .browser-capture-import footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.browser-capture-import h2 { margin: 0; font-size: 22px; }
+.browser-capture-import header p, .browser-capture-import footer { color: #596477; font-size: 14px; }
+.browser-capture-import button { border: 1px solid var(--line); border-radius: 8px; background: var(--canvas); padding: 9px 13px; cursor: pointer; }
+.browser-capture-import button:disabled { opacity: .5; cursor: default; }
+.browser-capture-import footer button { background: var(--nav); color: white; white-space: nowrap; }
+.browser-capture-import :focus-visible { outline: 3px solid #426da6; outline-offset: 3px; }
+.browser-capture-import [role=alert] { color: #a03d29; }
+.capture-empty { padding: 30px 18px; border: 1px dashed var(--line); border-radius: 10px; }
+.capture-selection { display: flex; gap: 10px; margin: 12px 0; }
+.capture-preview { max-height: 42vh; overflow: auto; border-block: 1px solid var(--line); margin-bottom: 18px; }
+.capture-preview-item { display: flex; align-items: flex-start; gap: 12px; padding: 16px 5px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.capture-preview-item > div { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.capture-preview-item input { width: 18px; height: 18px; margin-top: 5px; flex-shrink: 0; }
+.capture-preview-item small, .capture-preview-item strong { display: block; }
+.capture-preview-item small { color: #596477; }
+.capture-preview-item p { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 180px; overflow: auto; margin: 8px 0; }
+.capture-source { font-size: 13px; overflow-wrap: anywhere; color: #596477; }
+@media (max-width: 600px) { .browser-capture-import { padding: 16px; } .browser-capture-import footer { align-items: stretch; flex-direction: column; } }
+
 * {
   box-sizing: border-box;
 }

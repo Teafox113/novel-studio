@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Novel Studio 素材收集助手（測試版）",
+  "version": "0.1.0",
+  "description": "手動收集網頁摘錄與便條，保留來源，匯出後帶回 Novel Studio。資料保留於本機。",
+  "permissions": ["contextMenus", "storage", "activeTab"],
+  "background": { "service_worker": "worker.js", "type": "module" },
+  "action": { "default_popup": "popup.html", "default_title": "Novel Studio 素材收集助手" }
+}

@@ -45,6 +45,8 @@ import { InspirationEditor } from "./components/InspirationEditor";
 import { Outliner } from "./components/Outliner";
 import { ProjectSearchDialog } from "./components/ProjectSearchDialog";
 import { QuickCaptureDialog } from "./components/QuickCaptureDialog";
+import { BrowserCaptureImport } from "./components/BrowserCaptureImport";
+import { importBrowserCaptures } from "./capture/browserCapture";
 import { ResearchLibrary } from "./components/ResearchLibrary";
 import { ResearchQuickPanel } from "./components/ResearchQuickPanel";
 import { StoryEditor } from "./components/StoryEditor";
@@ -240,6 +242,7 @@ function App() {
   const [libraryError, setLibraryError] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [quickCaptureOpen, setQuickCaptureOpen] = useState(false);
+  const [browserCaptureOpen, setBrowserCaptureOpen] = useState(false);
   const [researchPeekOpen, setResearchPeekOpen] = useState(false);
   const [researchPeekPinned, setResearchPeekPinned] = useState(
     () => localStorage.getItem("novel-studio:research-peek-pinned") === "true",
@@ -1677,6 +1680,7 @@ function App() {
                   <span>帶到另一台電腦繼續寫</span>
                 </div>
                 <button role="menuitem" onClick={openLibrary}><Library size={17} /><span><strong>我的小說專案</strong><small>新建、開啟與另存副本</small></span></button>
+                <button role="menuitem" onClick={() => { setTransferMenuOpen(false); setBrowserCaptureOpen(true); }}><ClipboardPaste size={17} /><span><strong>匯入瀏覽器素材</strong><small>預覽摘錄與便條紙，保留來源</small></span></button>
                 <button role="menuitem" onClick={exportProject}>
                   <Download size={17} />
                   <span>
@@ -2082,6 +2086,10 @@ function App() {
           onCaptureFiles={captureQuickFiles}
         />
       )}
+      {browserCaptureOpen && <BrowserCaptureImport key={project.id} project={project} onClose={() => setBrowserCaptureOpen(false)} onImport={entries => {
+        setProject(current => current ? importBrowserCaptures(current, entries) : current);
+        showNotice("素材已加入專案；摘錄可在研究素材查看，筆記可在便條紙查看");
+      }} />}
       {variableLibrary !== null && <VariableLibrary key={`${project.id}:${variableLibrary}`} project={project} selectedId={variableLibrary} onClose={() => setVariableLibrary(null)} onSave={value => setProject(current => current ? { ...current, writingVariables: (current.writingVariables ?? []).map(v => v.id === value.id ? value : v), updatedAt: new Date().toISOString() } : current)} onOpenSource={(sceneId, sourceId) => { setVariableLibrary(null); setVariableSource(sourceId); openWorldScene(sceneId); }} />}
       {settingsOpen && (
         <AppearanceDialog

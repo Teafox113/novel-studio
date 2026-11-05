@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Novel Studio 素材匣</title><link rel="stylesheet" href="popup.css"></head>
+<body><header><span>NOVEL STUDIO · 測試版</span><h1>先收下靈感，稍後再整理</h1><p>網頁反白後按右鍵收集，或在這裡寫一張便條。</p></header>
+<form id="note-form"><label for="note">隨手便條</label><textarea id="note" rows="3" maxlength="20000" placeholder="寫下突然想到的情節…" required></textarea><label class="source-option"><input type="checkbox" id="include-source">附上目前網頁來源</label><button id="save" type="submit">收進素材匣</button></form>
+<p id="status" role="status" aria-live="polite"></p><section><div class="list-heading"><h2>待整理 <span id="count">0</span></h2><button id="export" type="button">匯出全部</button></div><label for="search">尋找素材</label><input id="search" type="search" placeholder="搜尋文字、標題或來源"><div id="entries"></div></section>
+<footer>本機儲存，沒有自動上傳。匯出後，到 Novel Studio「專案與備份 → 匯入瀏覽器素材」。移除擴充功能會清除本機素材；請先匯出。摘錄仍須遵守來源的使用授權。</footer><script type="module" src="popup.js"></script></body></html>
