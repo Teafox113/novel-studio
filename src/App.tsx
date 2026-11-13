@@ -8,6 +8,7 @@ import { blockNumber, syncBook } from "./domain/interactiveBook";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArchiveRestore,
+  Menu, Pin, PinOff, Moon, Sun, LoaderCircle, ChevronDown,
   Blocks,
   AlertTriangle,
   BookOpenText,
@@ -137,14 +138,14 @@ function timelineEventForScene(
 }
 
 const sectionItems = [
-  { id: "interactive" as const, label: "互動書籍", icon: ListTree },
+  { id: "interactive" as const, label: "互動分支", icon: ListTree },
   { id: "manuscript" as const, label: "手稿", icon: BookOpenText },
   { id: "world" as const, label: "世界觀", icon: Library },
   { id: "timeline" as const, label: "時間線", icon: Waypoints },
   { id: "history" as const, label: "架空歷史一覽", icon: History },
   { id: "research" as const, label: "研究", icon: FileSearch },
   { id: "compile" as const, label: "匯出", icon: FileOutput },
-  { id: "ai" as const, label: "AI 協作", icon: Sparkles },
+  { id: "ai" as const, label: "審核", icon: Sparkles },
 ];
 
 const moduleCopy: Record<
@@ -217,6 +218,21 @@ function App() {
   const [section, setSection] = useState<Section>("manuscript");
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [focusMode, setFocusMode] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem("novel-studio:theme") === "dark" ? "dark" : "light");
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [catalogPinned, setCatalogPinned] = useState(() => localStorage.getItem("novel-studio:catalog-pinned") === "true");
+  const [focusNoteId, setFocusNoteId] = useState("");
+  const [backupSummary, setBackupSummary] = useState("讀取備份狀態…");
+  const catalogRef = useRef<HTMLDivElement>(null);
+  const mode = section === "manuscript" ? "writing" : ["world", "timeline", "history", "research"].includes(section) ? "setting" : "publishing";
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("novel-studio:theme", theme); } catch { /* Display preference only. */ }
+  }, [theme]);
+  useEffect(() => { try { localStorage.setItem("novel-studio:catalog-pinned", String(catalogPinned)); } catch { /* Display preference only. */ } }, [catalogPinned]);
+  useEffect(() => { if (catalogOpen) catalogRef.current?.querySelector<HTMLButtonElement>(".binder-row.selected, .binder-row")?.focus(); }, [catalogOpen]);
+  const closeCatalog = () => { setCatalogOpen(false); requestAnimationFrame(() => document.querySelector<HTMLElement>(".story-prose")?.focus()); };
+
   useEffect(() => {
     if (!focusMode) return;
     const exit = (event: KeyboardEvent) => {
@@ -265,7 +281,9 @@ function App() {
       .load()
       .then((storedProject) => {
         if (!active) return;
-        setProject(storedProject ?? structuredClone(sampleProject));
+        const loadedProject = storedProject ?? structuredClone(sampleProject);
+        setProject(loadedProject);
+        setSelectedId(manuscriptScenes(loadedProject)[0]?.id ?? loadedProject.nodes[0]?.id ?? "");
         hydrated.current = true;
         if (storedProject) {
           void repository
@@ -1400,6 +1418,7 @@ function App() {
   };
 
   const chooseSection = (next: Section) => {
+    setTransferMenuOpen(false); setCatalogOpen(false); setFocusMode(false);
     setSection(next);
     if (next === "manuscript") setView("editor");
     if (next !== "manuscript" && !researchPeekPinned) setResearchPeekOpen(false);
@@ -1600,26 +1619,23 @@ function App() {
   };
 
   return (
-    <div className={`app-shell ${focusMode && section === "manuscript" ? "typewriter-mode" : ""}`}>
+    <div className={`app-shell mode-${mode} ${catalogPinned ? "catalog-pinned" : ""} ${focusMode && section === "manuscript" ? "typewriter-mode" : ""}`}>
       {focusMode && section === "manuscript" && <div className="typewriter-controls">
-        <span>深夜書房 · {saveState === "saved" ? "已儲存" : saveState === "saving" ? "儲存中…" : "儲存失敗，請退出檢查"}</span>
+        <span>專注寫作 · {saveState === "saved" ? "已儲存" : saveState === "saving" ? "儲存中…" : "儲存失敗，請退出檢查"}</span>
         <button onClick={() => setResearchPeekOpen(open => !open)} aria-pressed={researchPeekOpen}>參考浮窗</button>
         <button onClick={() => setFocusMode(false)}>退出專注 · Esc</button>
       </div>}
       <header className="topbar">
-        <div className="brand">
-          <div className="brand-mark">N</div>
-          <div>
-            <strong>Novel Studio</strong>
-            <span>本機優先創作空間</span>
-          </div>
+        <div className="project-heading">
+          <button className="icon-button" aria-label="開啟目錄" aria-expanded={catalogOpen || catalogPinned} onClick={() => { if (section !== "manuscript") chooseSection("manuscript"); setCatalogOpen(open => !open); }}><Menu size={18} /></button>
+          <button className="project-title-button" onClick={openLibrary} title="切換或建立作品">{project.title}<ChevronDown size={14} /></button>
         </div>
-        <div className="project-identity">
-          <span>{project.subtitle}</span>
-          <strong>{project.title}</strong>
-        </div>
+        <nav className="mode-tabs" aria-label="創作模式">
+          <button aria-current={mode === "writing" ? "page" : undefined} onClick={() => chooseSection("manuscript")}>寫作</button>
+          <button aria-current={mode === "setting" ? "page" : undefined} onClick={() => chooseSection("world")}>設定</button>
+          <button aria-current={mode === "publishing" ? "page" : undefined} onClick={() => chooseSection("compile")}>成書</button>
+        </nav>
         <div className="topbar-actions">
-          <VersionInfo />
           <button
             className="search-button"
             onClick={() => setSearchOpen(true)}
@@ -1644,25 +1660,17 @@ function App() {
             {saveState === "saved" ? (
               <Check size={14} />
             ) : saveState === "saving" ? (
-              <CloudOff size={14} />
+              <LoaderCircle size={14} className="saving-spinner" />
             ) : (
               <AlertTriangle size={14} />
             )}
             {saveState === "saved"
-              ? "已儲存"
+              ? (folderBackupProblem ? "已儲存 · 備份需要處理" : "已儲存")
               : saveState === "saving"
                 ? "儲存中"
                 : "儲存失敗"}
           </div>
-          <button
-            className="icon-button"
-            title="建立專案快照"
-            aria-label="建立專案快照"
-            onClick={createSnapshot}
-          >
-            <History size={17} />
-          </button>
-          <div className="project-menu-wrap">
+          <div className="project-menu-wrap" onKeyDown={event => { if (event.key === "Escape" && !event.nativeEvent.isComposing) { event.preventDefault(); event.stopPropagation(); setTransferMenuOpen(false); event.currentTarget.querySelector<HTMLButtonElement>("button")?.focus(); } }}>
             <button
               className="icon-button"
               title="專案與備份"
@@ -1677,8 +1685,12 @@ function App() {
               <div className="project-menu" role="menu">
                 <div className="project-menu-heading">
                   <strong>專案與備份</strong>
-                  <span>帶到另一台電腦繼續寫</span>
+                  <span>{backupSummary}</span>
                 </div>
+                <button role="menuitem" onClick={() => { setTransferMenuOpen(false); void createSnapshot(); }}><History size={17} /><span><strong>建立專案快照</strong><small>保留目前作品版本</small></span></button>
+                <button role="menuitem" onClick={() => { setTransferMenuOpen(false); setSettingsOpen(true); }}><Settings size={17} /><span><strong>介面與字型</strong><small>介面縮放與正文字級分開調整</small></span></button>
+                <button role="menuitem" onClick={() => setTheme(current => current === "dark" ? "light" : "dark")}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}<span><strong>{theme === "dark" ? "切換淺色主題" : "切換深色主題"}</strong></span></button>
+                <VersionInfo />
                 <button role="menuitem" onClick={openLibrary}><Library size={17} /><span><strong>我的小說專案</strong><small>新建、開啟與另存副本</small></span></button>
                 <button role="menuitem" onClick={() => { setTransferMenuOpen(false); setBrowserCaptureOpen(true); }}><ClipboardPaste size={17} /><span><strong>匯入瀏覽器素材</strong><small>預覽摘錄與便條紙，保留來源</small></span></button>
                 <button role="menuitem" onClick={exportProject}>
@@ -1709,33 +1721,22 @@ function App() {
         </div>
       </header>
 
-      <nav className="module-rail" aria-label="主要模組">
-        <div className="rail-top">
-          {sectionItems.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              className={section === id ? "active" : ""}
-              onClick={() => chooseSection(id)}
-              title={label}
-            >
-              <Icon size={19} />
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-        <div className="rail-bottom">
-          <button title="元件">
-            <Blocks size={19} />
-          </button>
-          <button title="設定" onClick={() => setSettingsOpen(true)}>
-            <Settings size={19} />
-          </button>
-          <div className="user-avatar">F</div>
-        </div>
-      </nav>
+      {mode !== "writing" && <nav className="section-tabs" aria-label={mode === "setting" ? "設定模組" : "成書模組"}>
+        {sectionItems.filter(item => mode === "setting" ? ["world", "timeline", "history", "research"].includes(item.id) : ["ai", "interactive", "compile"].includes(item.id)).sort((a, b) => (mode === "publishing" ? ["ai", "interactive", "compile"].indexOf(a.id) - ["ai", "interactive", "compile"].indexOf(b.id) : 0)).map(({ id, label, icon: Icon }) => <button key={id} aria-current={section === id ? "page" : undefined} onClick={() => chooseSection(id)}><Icon size={16} />{label}</button>)}
+      </nav>}
 
       {section === "manuscript" ? (
         <>
+          <button className="book-spine" aria-label="展開手稿目錄" onClick={() => setCatalogOpen(true)}><span className="spine-marks">{scenes.map(node => <i key={node.id} className={node.id === selectedId ? "active" : ""} />)}</span><span className="spine-title">{selectedNode?.title}</span></button>
+          {catalogOpen && !catalogPinned && <button className="catalog-scrim" aria-label="關閉目錄" onClick={closeCatalog} />}
+          <div ref={catalogRef} className={`catalog-drawer ${catalogOpen || catalogPinned ? "is-open" : ""}`} inert={!catalogOpen && !catalogPinned} role="region" aria-label="手稿目錄" onKeyDown={event => {
+            if (event.nativeEvent.isComposing) return;
+            if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setCatalogPinned(false); closeCatalog(); }
+            if (["ArrowDown", "ArrowUp"].includes(event.key) && (event.target as HTMLElement).matches(".binder-row")) {
+              event.preventDefault(); const rows = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>(".binder-row")); const index = rows.indexOf(event.target as HTMLButtonElement); rows[(index + (event.key === "ArrowDown" ? 1 : rows.length - 1)) % rows.length]?.focus();
+            }
+          }}>
+            <div className="catalog-heading"><strong>作品目錄</strong><button aria-label={catalogPinned ? "取消釘住目錄" : "釘住目錄"} aria-pressed={catalogPinned} onClick={() => { setCatalogPinned(!catalogPinned); setCatalogOpen(true); }}>{catalogPinned ? <PinOff size={16} /> : <Pin size={16} />}</button><button aria-label="關閉目錄" onClick={() => { setCatalogPinned(false); closeCatalog(); }}><X size={16} /></button></div>
           <Binder
             blockNumbers={project.interactiveBook?.enabled ? Object.fromEntries(project.interactiveBook.blocks.map(b => [b.sceneId, blockNumber(b.number)])) : undefined}
             nodes={project.nodes}
@@ -1744,96 +1745,19 @@ function App() {
             tags={project.tags}
             tagLinks={project.tagLinks}
             selectedInspirationId={selectedInspirationId}
-            onSelect={selectNode}
+            onSelect={id => { selectNode(id); if (!catalogPinned) closeCatalog(); }}
             onAddScene={addScene}
-            onSelectInspiration={selectInspiration}
+            onSelectInspiration={id => { selectInspiration(id); if (!catalogPinned) setCatalogOpen(false); }}
             onAddInspiration={addInspiration}
           />
+
+            <footer className="catalog-actions"><button onClick={() => { setView("corkboard"); if (!catalogPinned) setCatalogOpen(false); }}>卡片牆</button><button onClick={() => { setView("outliner"); if (!catalogPinned) setCatalogOpen(false); }}>大綱表</button><span>全書 {projectWordCount(project).toLocaleString()} 字</span></footer>
+          </div>
 
           <main
             className={`workspace ${!selectedInspiration && inspectorOpen && view === "editor" ? "with-inspector" : ""}`}
           >
-            <div className="workspace-toolbar">
-              <div className="breadcrumb">
-                {selectedInspiration ? (
-                  <>
-                    <span>靈感庫</span>
-                    <ChevronRight size={13} />
-                    <strong>{selectedInspiration.title}</strong>
-                  </>
-                ) : (
-                  <>
-                    <span>正文</span>
-                    <ChevronRight size={13} />
-                    <span>
-                      {selectedNode?.parentId === "volume-2"
-                        ? "第二部"
-                        : "第一部"}
-                    </span>
-                    {selectedNode?.kind === "scene" && (
-                      <>
-                        <ChevronRight size={13} />
-                        <strong>{selectedNode.title}</strong>
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
-              {selectedInspiration ? (
-                <span className="idea-workspace-label">未定構思</span>
-              ) : (
-                <div className="view-switcher">
-                  <button
-                    className={view === "editor" ? "active" : ""}
-                    onClick={() => setView("editor")}
-                    title="編輯器"
-                  >
-                    <Columns3 size={15} />
-                    編輯
-                  </button>
-                  <button
-                    className={view === "corkboard" ? "active" : ""}
-                    onClick={() => setView("corkboard")}
-                    title="卡片"
-                  >
-                    <LayoutGrid size={15} />
-                    卡片
-                  </button>
-                  <button
-                    className={view === "outliner" ? "active" : ""}
-                    onClick={() => setView("outliner")}
-                    title="大綱"
-                  >
-                    <ListTree size={15} />
-                    大綱
-                  </button>
-                </div>
-              )}
-              {!selectedInspiration && (
-                <div className="workspace-tool-actions">
-                  {view === "editor" && selectedNode?.kind === "scene" && selectedDocument && <button className="typewriter-entry" onClick={() => setFocusMode(true)}>打字機</button>}
-                  <button
-                    className={`icon-button quiet ${researchPeekOpen ? "active" : ""}`}
-                    title="研究浮窗（Ctrl+Shift+R）"
-                    onClick={() => setResearchPeekOpen((open) => !open)}
-                  >
-                    <FileSearch size={17} />
-                  </button>
-                  <button
-                    className="icon-button quiet inspector-toggle"
-                    title={inspectorOpen ? "關閉檢查器" : "開啟檢查器"}
-                    onClick={() => setInspectorOpen((open) => !open)}
-                  >
-                    {inspectorOpen ? (
-                      <PanelRightClose size={18} />
-                    ) : (
-                      <PanelRightOpen size={18} />
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
-
+            {(view !== "editor" || selectedInspiration) && <div className="workspace-toolbar"><button onClick={() => { setView("editor"); setSelectedInspirationId(null); }}>返回正文</button><span>{view === "corkboard" ? "卡片牆" : view === "outliner" ? "大綱表" : "靈感"}</span></div>}
             {selectedInspiration ? (
               <InspirationEditor
                 item={selectedInspiration}
@@ -1893,7 +1817,18 @@ function App() {
                       }
                     />
                   </div>
+                  <div className="scene-progress"><progress aria-label="本場寫作進度" value={selectedNode.targetWords ? selectedNode.wordCount : 0} max={Math.max(selectedNode.targetWords ?? 0, 1)} /><span>{selectedNode.wordCount.toLocaleString()} / {selectedNode.targetWords ? selectedNode.targetWords.toLocaleString() : "未設目標"} 字</span></div>
+                  <details className="scene-synopsis"><summary>場景摘要</summary><textarea aria-label="場景摘要" value={selectedNode.synopsis} onChange={event => patchNode(selectedNode.id, { synopsis: event.target.value })} /></details>
                   <StoryEditor
+                    wordCount={selectedNode.wordCount}
+                    onReference={() => setResearchPeekOpen(open => !open)}
+                    onToggleFocus={() => setFocusMode(value => !value)}
+                    onToggleMargin={() => setInspectorOpen(value => !value)}
+                    onAddNote={text => {
+                      const now = new Date().toISOString(); const id = `sticky-${crypto.randomUUID()}`;
+                      setProject(current => current ? { ...current, inspirations: [{ id, title: text ? text.slice(0, 36) : "場景便條", content: text ? `摘錄：${text}\n\n` : "", kind: "note", status: "inbox", linkedNodeIds: [selectedNode.id], linkedEntityIds: [], createdAt: now, updatedAt: now }, ...current.inspirations], updatedAt: now } : current);
+                      setInspectorOpen(true); setFocusNoteId(id);
+                    }}
                     sceneId={selectedNode.id}
                     variables={project.writingVariables ?? []}
                     focusSourceId={variableSource}
@@ -1911,12 +1846,28 @@ function App() {
                     onChange={updateDocument}
                   />
                   {project.interactiveBook?.enabled && <BranchEditor key={selectedNode.id} project={project} sceneId={selectedNode.id} onChange={setProject} onOpenScene={openWorldScene} />}
-                  <div className="editor-statusbar">
-                    <span>{selectedNode.wordCount.toLocaleString()} 字</span>
-                    <span>修訂 {selectedDocument.revision}</span>
-                    <span>UTF-8</span>
-                  </div>
                 </div>
+                <aside className={`manuscript-margin ${inspectorOpen ? "" : "is-collapsed"}`} aria-label="寫作邊欄">
+              <Inspector
+                onOpenEntity={id => { setSelectedWorldEntityId(id); chooseSection("world"); }}
+                node={selectedNode}
+                entities={project.entities}
+                povEntityId={selectedPovEntity?.id ?? ""}
+                locationEntityId={selectedLocationEntity?.id ?? ""}
+                tagNames={tagsForTarget("scene", selectedNode.id).map(
+                  (tag) => tag.name,
+                )}
+                onChange={(patch) => patchNode(selectedNode.id, patch)}
+                onEntityChange={(role, entityId) =>
+                  updateSceneEntity(selectedNode.id, role, entityId)
+                }
+                onTagsChange={(names) =>
+                  updateTargetTags("scene", selectedNode.id, names)
+                }
+              />
+                  <StickyNotes docked focusNoteId={focusNoteId} projectId={project.id} key={project.id} notes={project.inspirations} saveState={saveState} onAdd={note => setProject(current => current ? { ...current, inspirations: [note, ...current.inspirations], updatedAt: note.updatedAt } : current)} onPatch={patchInspiration} />
+                  {(project.writingVariables ?? []).filter(v => v.status === "pending" && v.sources.some(source => source.sceneId === selectedNode.id)).map(v => <section className="margin-variable" key={v.id}><strong>{v.name}</strong><p>已記成變數，細節待補。</p><button onClick={() => setVariableLibrary(v.id)}>現在設定</button></section>)}
+                </aside>
               </div>
             ) : view === "corkboard" ? (
               <Corkboard
@@ -1945,24 +1896,6 @@ function App() {
               </div>
             )}
 
-            {!selectedInspiration && view === "editor" && inspectorOpen && selectedNode?.kind === "scene" && (
-              <Inspector
-                node={selectedNode}
-                entities={project.entities}
-                povEntityId={selectedPovEntity?.id ?? ""}
-                locationEntityId={selectedLocationEntity?.id ?? ""}
-                tagNames={tagsForTarget("scene", selectedNode.id).map(
-                  (tag) => tag.name,
-                )}
-                onChange={(patch) => patchNode(selectedNode.id, patch)}
-                onEntityChange={(role, entityId) =>
-                  updateSceneEntity(selectedNode.id, role, entityId)
-                }
-                onTagsChange={(names) =>
-                  updateTargetTags("scene", selectedNode.id, names)
-                }
-              />
-            )}
           </main>
         </>
       ) : section === "world" ? (
@@ -2060,8 +1993,8 @@ function App() {
         </div>
       )}
       {libraryOpen && <ProjectLibrary projects={libraryProjects} currentId={project.id} busy={operationBusy} error={libraryError} onClose={() => setLibraryOpen(false)} onCreate={(title, author) => changeProject(createBlankProject(title, author))} onCopy={title => changeProject(duplicateProject(project, title))} onOpen={changeProject} />}
-      <StickyNotes projectId={project.id} key={project.id} notes={project.inspirations} saveState={saveState} onAdd={note => setProject(current => current ? { ...current, inspirations: [note, ...current.inspirations], updatedAt: note.updatedAt } : current)} onPatch={patchInspiration} />
-      <FolderBackup project={savedForBackup} canBackup={saveState === "saved" && savedForBackup?.id === project.id && !operationBusy} open={folderBackupOpen} onClose={() => setFolderBackupOpen(false)} onProblem={setFolderBackupProblem} onPending={setFolderBackupPending} onRestore={(restored, name) => restoreSnapshot({ id: crypto.randomUUID(), projectId: restored.id, project: restored, label: name, createdAt: new Date().toISOString() })} />
+
+      <FolderBackup onSummary={setBackupSummary} project={savedForBackup} canBackup={saveState === "saved" && savedForBackup?.id === project.id && !operationBusy} open={folderBackupOpen} onClose={() => setFolderBackupOpen(false)} onProblem={setFolderBackupProblem} onPending={setFolderBackupPending} onRestore={(restored, name) => restoreSnapshot({ id: crypto.randomUUID(), projectId: restored.id, project: restored, label: name, createdAt: new Date().toISOString() })} />
       {backupDialogOpen && (
         <BackupDialog
           project={project}

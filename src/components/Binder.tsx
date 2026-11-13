@@ -67,7 +67,10 @@ function TreeBranch({
               )}
               <span className="binder-title">{blockNumbers?.[node.id] ? `${blockNumbers[node.id]} ` : ""}{node.title}</span>
               {node.kind === "scene" && (
-                <span className={`status-dot status-${node.status}`} />
+                <span className="binder-count">{node.wordCount.toLocaleString()}</span>
+              )}
+              {node.kind === "scene" && (
+                <span title={node.status} className={`status-dot status-${node.status}`} />
               )}
             </button>
             {children.length > 0 && (

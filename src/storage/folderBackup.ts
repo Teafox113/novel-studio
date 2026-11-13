@@ -3,7 +3,7 @@ import { serializePortableProject } from "../portable/projectArchive";
 
 export type BackupSlot = "local" | "drive";
 export type BackupConfig = Record<BackupSlot, string | null>;
-export interface BackupStatus { message: string; error: boolean; filename?: string; projectTitle?: string }
+export interface BackupStatus { message: string; error: boolean; filename?: string; projectTitle?: string; projectId?: string }
 export type BackupWriter = (slot: BackupSlot, content: string) => Promise<string>;
 
 /** Each destination advances independently; a failed Drive write cannot mask a local success. */
@@ -26,13 +26,13 @@ export class FolderBackupRunner {
         if (!folder) continue;
         const key = `${slot}:${folder}:${project.id}`;
         if (!force && this.completed.get(key) === fingerprint) continue;
-        report(slot, { message: "正在寫入備份…", error: false, projectTitle: project.title });
+        report(slot, { message: "正在寫入備份…", error: false, projectTitle: project.title, projectId: project.id });
         try {
           const filename = await write(slot, content);
           this.completed.set(key, fingerprint);
-          report(slot, { message: `${new Date().toLocaleString("zh-TW")} · 已寫入${slot === "drive" ? "，雲端進度請查看 Drive 電腦版" : ""}`, error: false, filename, projectTitle: project.title });
+          report(slot, { message: `${new Date().toLocaleString("zh-TW")} · 已寫入${slot === "drive" ? "，雲端進度請查看 Drive 電腦版" : ""}`, error: false, filename, projectTitle: project.title, projectId: project.id });
         } catch (e) {
-          report(slot, { message: `備份失敗：${e instanceof Error ? e.message : String(e)}。請確認位置後重試。`, error: true, projectTitle: project.title });
+          report(slot, { message: `備份失敗：${e instanceof Error ? e.message : String(e)}。請確認位置後重試。`, error: true, projectTitle: project.title, projectId: project.id });
         }
       }
     } finally { this.running = false; }

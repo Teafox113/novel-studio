@@ -48,10 +48,14 @@ export function CompileCenter({
   const [options, setOptions] = useState<CompileOptions>(() =>
     defaultCompileOptions(project),
   );
-  const [format, setFormat] = useState<CompileFormat>("docx");
+  const [format, setFormat] = useState<CompileFormat>("epub");
   const [busy, setBusy] = useState(false);
   const book = useMemo(() => compileProject(project, options), [project, options]);
 
+  const includedScenes = project.nodes.filter(node => node.kind === "scene" && options.includedStatuses.includes(node.status));
+  const emptyScenes = includedScenes.filter(node => !node.documentId || !project.documents[node.documentId]?.plainText.trim());
+  const unfinishedScenes = includedScenes.filter(node => node.status !== "完成");
+  const pendingFindings = project.aiFindings.filter(finding => finding.status === "pending");
   const patch = (next: Partial<CompileOptions>) =>
     setOptions((current) => ({ ...current, ...next }));
 
@@ -93,7 +97,11 @@ export function CompileCenter({
           <p>從同一份手稿產生投稿檔、電子書與保存版本。</p>
         </header>
 
-        <div className="compile-settings-scroll">
+        <nav className="compile-thumbnails" aria-label="預覽頁面">
+          {options.includeTitlePage && <button onClick={() => document.querySelector(".compile-title-page")?.scrollIntoView({ block: "start" })}><strong>{options.title || "未命名作品"}</strong><small>扉頁</small></button>}
+          {book.volumes.flatMap(volume => volume.scenes).map(scene => <button key={scene.id} onClick={() => document.getElementById(`preview-${scene.id}`)?.scrollIntoView({ block: "start" })}><strong>{scene.title}</strong><small>{scene.paragraphs[0]?.slice(0, 48) || "尚無正文"}</small></button>)}
+        </nav>
+        <details className="compile-options"><summary>書籍資料與匯出設定</summary><div className="compile-settings-scroll">
           <section>
             <h2><BookCopy size={14} />書籍資料</h2>
             <label><span>書名</span><input value={options.title} onChange={(event) => patch({ title: event.target.value })} /></label>
@@ -114,7 +122,7 @@ export function CompileCenter({
             <h2><Check size={14} />包含狀態</h2>
             <div className="compile-statuses">{statuses.map((status) => <button key={status} className={options.includedStatuses.includes(status) ? "active" : ""} onClick={() => toggleStatus(status)}><span>{options.includedStatuses.includes(status) && <Check size={11} />}</span>{status}</button>)}</div>
           </section>
-        </div>
+        </div></details>
       </aside>
 
       <main className="compile-preview-pane">
@@ -124,14 +132,22 @@ export function CompileCenter({
         </div>
         <article className="compile-preview">
           {options.includeTitlePage && <section className="compile-title-page"><h1>{book.title}</h1>{book.subtitle && <p>{book.subtitle}</p>}{book.author && <strong>{book.author}</strong>}</section>}
-          {book.volumes.map((volume) => <section className="compile-volume" key={volume.id}>{options.includeVolumeTitles && <h1>{volume.title}</h1>}{volume.scenes.map((scene, index) => <section className={`compile-scene break-${options.sceneBreakStyle}`} key={scene.id}>{options.includeSceneTitles && <h2>{scene.title}</h2>}{options.includeSynopsis && scene.synopsis && <aside>摘要｜{scene.synopsis}</aside>}{scene.paragraphs.map((paragraph, paragraphIndex) => <p key={`${scene.id}-${paragraphIndex}`}>{paragraph}</p>)}{options.sceneBreakStyle === "asterism" && index < volume.scenes.length - 1 && <div className="compile-scene-break">⁂</div>}</section>)}</section>)}
+          {book.volumes.map((volume) => <section className="compile-volume" key={volume.id}>{options.includeVolumeTitles && <h1>{volume.title}</h1>}{volume.scenes.map((scene, index) => <section id={`preview-${scene.id}`} className={`compile-scene break-${options.sceneBreakStyle}`} key={scene.id}>{options.includeSceneTitles && <h2>{scene.title}</h2>}{options.includeSynopsis && scene.synopsis && <aside>摘要｜{scene.synopsis}</aside>}{scene.paragraphs.map((paragraph, paragraphIndex) => <p key={`${scene.id}-${paragraphIndex}`}>{paragraph}</p>)}{options.sceneBreakStyle === "asterism" && index < volume.scenes.length - 1 && <div className="compile-scene-break">⁂</div>}</section>)}</section>)}
           {book.sceneCount === 0 && <div className="compile-empty"><FileText size={35} /><strong>沒有可預覽的場景</strong><span>請在左側至少選擇一種稿件狀態。</span></div>}
         </article>
       </main>
 
       <aside className="compile-output">
+        <section className="compile-preflight" aria-label="匯出前檢查"><h2>匯出前檢查</h2>
+          <p>{emptyScenes.length ? `${emptyScenes.length} 個場景還沒有正文` : `${includedScenes.length} 個場景都有正文`}</p>
+          <p>{unfinishedScenes.length ? `${unfinishedScenes.length} 個場景尚未標為完成` : "所選場景皆已完成"}</p>
+          {includedScenes.some(node => node.status === "構思") && <button onClick={() => patch({ includedStatuses: ["草稿", "修訂", "完成"] })}>只匯出草稿以上</button>}
+          <p>審核有 {pendingFindings.length} 個提示待處理</p><small>提示不會阻止匯出，請自行確認內容。</small>
+        </section>
         <header><span className="eyebrow">OUTPUT</span><h2>輸出格式</h2></header>
         <div className="compile-format-list">{formatOptions.map(({ id, label, description, icon: Icon }) => <button key={id} className={format === id ? "active" : ""} onClick={() => setFormat(id)}><span><Icon size={17} /></span><span><strong>{label}</strong><small>{description}</small></span>{format === id && <Check size={14} />}</button>)}</div>
+        <button className="compile-export" onClick={exportBook} disabled={busy || book.sceneCount === 0}>{format === "pdf" ? <Printer size={15} /> : <Download size={15} />}{busy ? "產生中…" : format === "pdf" ? "列印／另存 PDF" : `匯出 ${format.toUpperCase()}`}</button>
+        <details className="compile-summary-details"><summary>本次書稿統計</summary>
         <div className="compile-summary">
           <h3>本次書稿</h3>
           <div><span>卷數</span><strong>{book.volumes.length}</strong></div>
@@ -139,8 +155,9 @@ export function CompileCenter({
           <div><span>字數</span><strong>{book.wordCount.toLocaleString()}</strong></div>
           <div><span>預估頁數</span><strong>約 {Math.max(1, Math.ceil(book.wordCount / 500))} 頁</strong></div>
         </div>
+        </details>
         <div className="compile-pdf-note"><Sparkles size={14} /><p>{format === "pdf" ? "PDF 會開啟系統列印視窗，請選擇「另存為 PDF」。系統字型能正確保存繁體中文。" : "輸出檔不會修改正文；改變左側選項只影響這次匯出。"}</p></div>
-        <button className="compile-export" onClick={exportBook} disabled={busy || book.sceneCount === 0}>{format === "pdf" ? <Printer size={15} /> : <Download size={15} />}{busy ? "產生中…" : format === "pdf" ? "列印／另存 PDF" : `匯出 ${format.toUpperCase()}`}</button>
+
       </aside>
     </div>
   );

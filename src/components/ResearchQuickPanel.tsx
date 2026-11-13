@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   BookOpenText,
   Check,
@@ -90,7 +90,7 @@ export function ResearchQuickPanel({
   };
 
   return (
-    <aside className={`research-quick-panel ${floating ? `floating-reference ${corner} ${collapsed ? "collapsed" : ""}` : ""}`} style={{ width }} aria-label="研究參考浮窗">
+    <aside className={`research-quick-panel ${floating ? `floating-reference ${corner} ${collapsed ? "collapsed" : ""}` : ""}`} style={{ width, "--reference-width": `${width}px` } as CSSProperties} aria-label="研究參考浮窗">
       <button
         className="research-panel-resizer"
         onPointerDown={beginResize}
@@ -98,7 +98,7 @@ export function ResearchQuickPanel({
       />
       <header className="research-quick-header">
         <div>
-          <span>RESEARCH PEEK</span>
+
           <strong>研究浮窗</strong>
         </div>
         <button
@@ -116,6 +116,7 @@ export function ResearchQuickPanel({
           <option value="top-right">右上角</option><option value="bottom-right">右下角</option>
           <option value="top-left">左上角</option><option value="bottom-left">左下角</option>
         </select>
+        <label>寬度<input aria-label="參考浮窗寬度" type="range" min="320" max="720" step="20" value={width} onChange={event => onWidthChange(Number(event.target.value))} /></label>
         <button onClick={() => setCollapsed(value => !value)} aria-expanded={!collapsed}>{collapsed ? "展開參考" : "收合參考"}</button>
       </div>}
 

@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import type { InspirationItem } from "../domain/models";
 
-export function StickyNotes({ projectId, notes, saveState, onAdd, onPatch }: {
+export function StickyNotes({ docked = false, focusNoteId, projectId, notes, saveState, onAdd, onPatch }: {
+  docked?: boolean; focusNoteId?: string;
   projectId: string; notes: InspirationItem[]; saveState: string; onAdd: (note: InspirationItem) => void;
   onPatch: (id: string, patch: Partial<InspirationItem>) => void;
 }) {
   const preferenceKey = `novel-studio:sticky:${projectId}`;
   const [preferences] = useState(() => { try { const value = JSON.parse(localStorage.getItem(preferenceKey) ?? "{}"); return value && typeof value === "object" ? value : {}; } catch { return {}; } });
-  const [open, setOpen] = useState(preferences.open === true);
+  const [open, setOpen] = useState(docked || preferences.open === true);
   const [collapsed, setCollapsed] = useState(preferences.collapsed === true);
   const [left, setLeft] = useState(preferences.left === true);
   const [selected, setSelected] = useState(typeof preferences.selected === "string" ? preferences.selected : "");
   const [trash, setTrash] = useState(false);
+  useEffect(() => { if (focusNoteId) { setSelected(focusNoteId); setOpen(true); setCollapsed(false); setTrash(false); } }, [focusNoteId]);
   useEffect(() => { try { localStorage.setItem(preferenceKey, JSON.stringify({ open, collapsed, left, selected })); } catch { /* Preferences must not block manuscript saving. */ } }, [preferenceKey, open, collapsed, left, selected]);
   const all = notes.filter(n => n.id.startsWith("sticky-") && n.kind === "note");
   const items = all.filter(n => trash ? n.status === "archived" : n.status !== "archived");
@@ -23,6 +25,7 @@ export function StickyNotes({ projectId, notes, saveState, onAdd, onPatch }: {
   };
   useEffect(() => {
     const shortcut = (e: KeyboardEvent) => {
+      if (e.isComposing || e.defaultPrevented) return;
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === "KeyN") {
         e.preventDefault(); if (!open) { if (!current) add(); else { setOpen(true); setCollapsed(false); } } else setOpen(false);
       }
@@ -31,8 +34,8 @@ export function StickyNotes({ projectId, notes, saveState, onAdd, onPatch }: {
     return () => window.removeEventListener("keydown", shortcut);
   });
   if (!open) return <button className="sticky-launch" title="便條紙 · Ctrl+Shift+N" onClick={() => { if (!current) add(); else { setOpen(true); setCollapsed(false); } }}>便條紙{all.filter(n => n.status !== "archived").length ? ` · ${all.filter(n => n.status !== "archived").length}` : ""}</button>;
-  return <aside className={`sticky-notes ${left ? "sticky-left" : ""}`} aria-label="隨手便條紙">
-    <header><strong>便條紙</strong><button onClick={() => setLeft(!left)} aria-label={left ? "移到右側" : "移到左側"}>{left ? "移右" : "移左"}</button><button onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}>{collapsed ? "展開" : "收合"}</button><button onClick={() => setOpen(false)} aria-label="關閉便條紙">×</button></header>
+  return <aside className={`sticky-notes ${docked ? "margin-notes" : ""} ${left ? "sticky-left" : ""}`} aria-label="隨手便條紙">
+    <header><strong>便條紙</strong>{!docked && <button onClick={() => setLeft(!left)} aria-label={left ? "移到右側" : "移到左側"}>{left ? "移右" : "移左"}</button>}<button onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}>{collapsed ? "展開" : "收合"}</button><button onClick={() => setOpen(false)} aria-label="關閉便條紙">×</button></header>
     {!collapsed && <><div className="sticky-tools"><select aria-label="選擇便條紙" value={current?.id ?? ""} onChange={e => setSelected(e.target.value)}>{items.map(n => <option key={n.id} value={n.id}>{n.title || "未命名便條"}</option>)}</select><button onClick={add}>＋新增</button></div>
       <button onClick={() => { setTrash(!trash); setSelected(""); }}>{trash ? "返回便條" : `回收區 · ${all.filter(n => n.status === "archived").length}`}</button>
       {!current && <p>{trash ? "回收區是空的。" : "還沒有便條，按新增開始。"}</p>}

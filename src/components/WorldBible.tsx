@@ -292,9 +292,37 @@ export function WorldBible({
           </header>
 
           <div className="world-editor-scroll">
-            {selected.type === "character" && <CharacterSheet key={selected.id} entity={selected} project={project} onChange={characterSheet => onPatchEntity(selected.id, { characterSheet })} onOpenEntity={setSelectedId} onOpenScene={onOpenScene} />}
-            <section className="world-form-section">
-              <h2>基本資料</h2>
+
+            <section className="world-form-section dictionary-heading">
+              <h2 className="sr-only">條目資料</h2>
+              <label className="world-full-field">
+                <span>別名與稱號</span>
+                <input
+                  key={selected.id}
+                  defaultValue={selected.aliases.join("、")}
+                  placeholder="例如：阿晝、渡鴉店主"
+                  onBlur={(event) =>
+                    onPatchEntity(selected.id, {
+                      aliases: event.target.value
+                        .split(/[、,，]/)
+                        .map((name) => name.trim())
+                        .filter(Boolean),
+                    })
+                  }
+                />
+              </label>
+              <label className="world-full-field">
+                <span>摘要</span>
+                <textarea
+                  value={selected.summary}
+                  placeholder="用幾句話說明這個元素，以及它在故事中的作用…"
+                  onChange={(event) =>
+                    onPatchEntity(selected.id, { summary: event.target.value })
+                  }
+                />
+              </label>
+
+              <details className="dictionary-options"><summary>類型、識別色與標籤</summary>
               <div className="world-fields two-columns">
                 <label>
                   <span>類型</span>
@@ -326,31 +354,6 @@ export function WorldBible({
                 </label>
               </div>
               <label className="world-full-field">
-                <span>別名與稱號</span>
-                <input
-                  value={selected.aliases.join("、")}
-                  placeholder="例如：阿晝、渡鴉店主"
-                  onChange={(event) =>
-                    onPatchEntity(selected.id, {
-                      aliases: event.target.value
-                        .split(/[、,，]/)
-                        .map((name) => name.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                />
-              </label>
-              <label className="world-full-field">
-                <span>摘要</span>
-                <textarea
-                  value={selected.summary}
-                  placeholder="用幾句話說明這個元素，以及它在故事中的作用…"
-                  onChange={(event) =>
-                    onPatchEntity(selected.id, { summary: event.target.value })
-                  }
-                />
-              </label>
-              <label className="world-full-field">
                 <span>標籤</span>
                 <div className="world-tag-input">
                   <Tag size={14} />
@@ -368,13 +371,15 @@ export function WorldBible({
                       )
                     }
                     onKeyDown={(event) => {
-                      if (event.key === "Enter") event.currentTarget.blur();
+                      if (event.key === "Enter" && !event.nativeEvent.isComposing) event.currentTarget.blur();
                     }}
                   />
                 </div>
               </label>
+              </details>
             </section>
 
+            {selected.type === "character" && <CharacterSheet key={selected.id} entity={selected} project={project} onChange={characterSheet => onPatchEntity(selected.id, { characterSheet })} onOpenEntity={setSelectedId} onOpenScene={onOpenScene} />}
             <section className="world-form-section">
               <div className="world-section-heading">
                 <div>
@@ -542,7 +547,7 @@ export function WorldBible({
 
         <div className="world-context-note">
           <Link2 size={15} />
-          <p><strong>資料會隨故事成長</strong>場景與靈感中的連結會自動回到這裡，後續可直接交給 AI 做一致性校對。</p>
+          <p><strong>資料會隨故事成長</strong>場景與靈感中的連結會自動回到這裡，可在成書模式的本機審核中檢查資料連結。</p>
         </div>
       </aside>
     </div>

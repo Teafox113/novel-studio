@@ -24,7 +24,7 @@ async function report(error) {
 }
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({ id: "capture-selection", title: "收進 Novel Studio 素材匣", contexts: ["selection"], documentUrlPatterns: ["http://*/*", "https://*/*"] });
+    chrome.contextMenus.create({ id: "capture-selection", title: "收集文字及來源至 Novel Studio 本機素材匣", contexts: ["selection"], documentUrlPatterns: ["http://*/*", "https://*/*"] });
   });
 });
 chrome.contextMenus.onClicked.addListener((info, tab) => {

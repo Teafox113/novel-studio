@@ -1,0 +1,56 @@
+/* 提案 C「稿紙・留白」設計變數
+   基準：novel-studio v0.18.0 + dev 3f186be
+   取材：原稿紙的綠色行線、校稿與落款用的印泥紅、書桌的石灰色。
+   整個介面只有兩種彩色：行線綠（結構）與印泥紅（你現在在哪、接下來按哪）。 */
+:root {
+  --desk: #e3e5e0;         /* 桌面：紙以外的所有地方 */
+  --paper: #fbfbf6;        /* 稿紙 */
+  --surface: #f3f4ef;      /* 抽屜、彈出層 */
+  --surface-2: #e9ebe5;
+  --line: #d3d8d0;
+  --rule: #cfdccf;         /* 稿紙行線（淡） */
+  --rule-strong: #3a6b48;  /* 行線綠（文字用，在 --paper 上 6.0:1、--desk 上 4.9:1） */
+  --ink: #1e2822;          /* 14.6:1 */
+  --ink-2: #47554c;        /* 7.6:1 */
+  --ink-3: #526157;        /* 6.3:1（在 --desk 上 5.2:1） */
+  --seal: #b3322a;         /* 印泥紅，白字 6.2:1 */
+  --seal-soft: #f5dfdb;
+  --on-seal: #ffffff;
+  --ok: #3a6b48; --warn: #8a5d00; --danger: #b3322a;
+  --focus: #2f6fd0;
+  --st-idea: #526157; --st-draft: #2f62b3; --st-revise: #b3322a; --st-done: #3a6b48;
+
+  --fs-xs: 12px; --fs-sm: 13px; --fs-md: 14px; --fs-lg: 16px; --fs-xl: 21px; --fs-2xl: 30px;
+  --font-ui: var(--ui-font-family, "Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans TC", "Noto Sans CJK TC", "PingFang TC", sans-serif);
+  /* 明體同時用在正文與介面的「名稱」（作品名、模式、頁面標題），操作文字仍用黑體 */
+  --font-prose: var(--manuscript-font-family, "Noto Serif TC", "Noto Serif CJK TC", "PMingLiU", "Songti TC", serif);
+  --r-sm: 2px; --r-md: 4px; --r-lg: 8px;   /* 紙張語彙，幾乎不用圓角 */
+  --shadow-paper: 0 1px 1px rgba(30, 40, 34, .08), 0 12px 32px rgba(30, 40, 34, .08);
+  --shadow-pop: 0 12px 36px rgba(30, 40, 34, .18), 0 0 0 1px var(--line);
+  --h-top: 48px; --w-spine: 44px; --w-paper: 720px; --w-margin: 280px;
+  --prose-size: 19px; --prose-line: 38px;   /* 行線間距 = 行高，兩者必須一起改 */
+}
+
+:root[data-theme="dark"] {
+  --desk: #141816; --paper: #1d2220; --surface: #232926; --surface-2: #2b322e;
+  --line: #2f3833; --rule: #2a352e; --rule-strong: #86b393;
+  --ink: #e3e8e3; --ink-2: #b3bdb5; --ink-3: #8c988f;
+  --seal: #e26f63; --seal-soft: #3b2522; --on-seal: #240c09;
+  --ok: #86b393; --warn: #e0b04f; --danger: #e26f63; --focus: #8fb6f5;
+  --st-idea: #8c988f; --st-draft: #8fb6f5; --st-revise: #e26f63; --st-done: #86b393;
+  --shadow-paper: 0 0 0 1px var(--line); --shadow-pop: 0 14px 40px rgba(0, 0, 0, .55), 0 0 0 1px var(--line);
+}
+
+:root {
+  --muted: var(--ink-3);
+  --canvas: var(--desk);
+  --nav: var(--ink);
+  --nav-soft: var(--surface-2);
+  --accent: var(--seal);
+  --accent-soft: var(--seal-soft);
+  --teal: var(--rule-strong);
+  --shadow: var(--shadow-paper);
+  --editor-font-size: 19px;
+  color-scheme: light;
+}
+:root[data-theme="dark"] { color-scheme: dark; }

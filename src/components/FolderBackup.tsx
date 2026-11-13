@@ -5,7 +5,7 @@ import type { StoryProject } from "../domain/models";
 import { isTauriRuntime } from "../storage/createProjectRepository";
 import { FolderBackupRunner, type BackupConfig, type BackupSlot, type BackupStatus } from "../storage/folderBackup";
 
-export function FolderBackup({ project, canBackup, open, onClose, onProblem, onRestore, onPending }: { project: StoryProject | null; canBackup: boolean; open: boolean; onClose: () => void; onProblem: (problem: boolean) => void; onPending: (pending: boolean) => void; onRestore: (project: StoryProject, name: string) => Promise<boolean> }) {
+export function FolderBackup({ onSummary, project, canBackup, open, onClose, onProblem, onRestore, onPending }: { onSummary?: (summary: string) => void; project: StoryProject | null; canBackup: boolean; open: boolean; onClose: () => void; onProblem: (problem: boolean) => void; onPending: (pending: boolean) => void; onRestore: (project: StoryProject, name: string) => Promise<boolean> }) {
   const desktop = isTauriRuntime();
   const [config, setConfig] = useState<BackupConfig>({ local: null, drive: null });
   const [status, setStatus] = useState<Partial<Record<BackupSlot, BackupStatus>>>({});
@@ -22,6 +22,10 @@ export function FolderBackup({ project, canBackup, open, onClose, onProblem, onR
   }, [desktop]);
   useEffect(() => { onProblem(!!error || Object.values(status).some(s => s?.error)); }, [error, status, onProblem]);
   useEffect(() => { onPending(busy || !!error || runner.current.isPending(project, config)); }, [project, config, busy, status, error, onPending]);
+  useEffect(() => {
+    const message = !desktop ? "瀏覽器版 · 請匯出作品備份" : error ? "備份設定讀取失敗" : !loaded ? "讀取備份設定…" : !config.local && !config.drive ? "尚未啟用資料夾備份" : busy ? "正在寫入資料夾備份…" : (["local", "drive"] as const).filter(slot => config[slot]).map(slot => `${slot === "local" ? "本機" : "Drive 資料夾"}：${status[slot]?.projectId === project?.id ? status[slot]?.message : "等待本作品備份"}`).join("；");
+    onSummary?.(message);
+  }, [desktop, error, loaded, config, busy, status, project?.id, project?.title, onSummary]);
   const run = async (force = false) => {
     const { project, config } = current.current;
     if (!desktop || !project || working.current) return;

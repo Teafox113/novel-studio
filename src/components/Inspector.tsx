@@ -8,6 +8,7 @@ import type {
 } from "../domain/models";
 
 interface InspectorProps {
+  onOpenEntity: (id: string) => void;
   node: ProjectNode;
   entities: StoryEntity[];
   povEntityId: string;
@@ -21,6 +22,7 @@ interface InspectorProps {
 const statuses: DraftStatus[] = ["構思", "草稿", "修訂", "完成"];
 
 export function Inspector({
+  onOpenEntity,
   node,
   entities,
   povEntityId,
@@ -32,9 +34,8 @@ export function Inspector({
 }: InspectorProps) {
   const [tagDraft, setTagDraft] = useState("");
 
-  useEffect(() => {
-    setTagDraft(tagNames.join("、"));
-  }, [node.id, tagNames]);
+  const tagText = tagNames.join("、");
+  useEffect(() => { setTagDraft(tagText); }, [node.id, tagText]);
 
   const commitTags = () => {
     onTagsChange(
@@ -54,21 +55,13 @@ export function Inspector({
         </div>
       </div>
 
-      <section className="inspector-section">
-        <label>摘要</label>
-        <textarea
-          value={node.synopsis}
-          placeholder="這個場景發生了什麼？"
-          onChange={(event) => onChange({ synopsis: event.target.value })}
-        />
-      </section>
-
       <section className="inspector-section metadata-list">
         <label>
           <UserRound size={14} />
           視角人物
         </label>
         <select
+          aria-label="視角人物"
           value={povEntityId}
           onChange={(event) => onEntityChange("pov", event.target.value)}
         >
@@ -87,6 +80,7 @@ export function Inspector({
           地點
         </label>
         <select
+          aria-label="場景地點"
           value={locationEntityId}
           onChange={(event) => onEntityChange("location", event.target.value)}
         >
@@ -105,6 +99,7 @@ export function Inspector({
           狀態
         </label>
         <select
+          aria-label="場景狀態"
           value={node.status}
           onChange={(event) =>
             onChange({ status: event.target.value as DraftStatus })
@@ -120,6 +115,7 @@ export function Inspector({
           目標字數
         </label>
         <input
+          aria-label="目標字數"
           type="number"
           min={0}
           step={100}
@@ -136,12 +132,13 @@ export function Inspector({
           場景標籤
         </label>
         <input
+          aria-label="場景標籤"
           value={tagDraft}
           placeholder="主線、伏筆、感情線"
           onChange={(event) => setTagDraft(event.target.value)}
           onBlur={commitTags}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
+            if (event.key === "Enter" && !event.nativeEvent.isComposing) {
               event.preventDefault();
               commitTags();
             }
@@ -154,26 +151,6 @@ export function Inspector({
         </div>
       </section>
 
-      <section className="inspector-section">
-        <div className="progress-label">
-          <label>場景進度</label>
-          <span>
-            {node.wordCount.toLocaleString()} /{" "}
-            {(node.targetWords ?? 0).toLocaleString()}
-          </span>
-        </div>
-        <div className="inspector-progress">
-          <span
-            style={{
-              width: `${Math.min(
-                100,
-                (node.wordCount / Math.max(node.targetWords ?? 1, 1)) * 100,
-              )}%`,
-            }}
-          />
-        </div>
-      </section>
-
       <section className="inspector-section entity-links">
         <label>本文連結</label>
         {entities
@@ -182,7 +159,7 @@ export function Inspector({
               entity.id === povEntityId || entity.id === locationEntityId,
           )
           .map((entity) => (
-            <button key={entity.id}>
+            <button key={entity.id} onClick={() => onOpenEntity(entity.id)}>
               <span
                 className="entity-avatar"
                 style={{ background: entity.color }}

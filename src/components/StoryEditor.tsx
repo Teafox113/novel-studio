@@ -6,7 +6,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
-  Bold,
+  Bold, Bookmark, Maximize2, Minimize2, PanelRight, Settings2, StickyNote, Variable,
   Heading2,
   Italic,
   List,
@@ -24,6 +24,11 @@ const VariableReference = Mark.create({
   renderHTML({ mark }) { return ["span", { "data-variable-reference": "", "data-variable-id": mark.attrs.variableId, "data-source-id": mark.attrs.sourceId }, 0]; },
 });
 interface StoryEditorProps {
+  wordCount: number;
+  onReference: () => void;
+  onToggleFocus: () => void;
+  onToggleMargin: () => void;
+  onAddNote: (text: string) => void;
   sceneId: string;
   variables: WritingVariable[];
   focusSourceId?: string;
@@ -38,6 +43,7 @@ interface StoryEditorProps {
 }
 
 export function StoryEditor({
+  wordCount, onReference, onToggleFocus, onToggleMargin, onAddNote,
   sceneId, variables, focusSourceId, onCollectVariable, onOpenVariables,
   documentId,
   content,
@@ -52,6 +58,9 @@ export function StoryEditor({
   const [lineHeight, setLineHeight] = useState(() => { try { const v = Number(localStorage.getItem("novel-studio:line-height")); return [1.6, 1.8, 2, 2.3, 2.6].includes(v) ? v : 2; } catch { return 2; } });
   const [spellcheck, setSpellcheck] = useState(() => { try { return localStorage.getItem("novel-studio:spellcheck") !== "false"; } catch { return true; } });
   const [selectedWords, setSelectedWords] = useState(0);
+  const [ruled, setRuled] = useState(() => localStorage.getItem("novel-studio:ruled-paper") !== "false");
+  const [toolbar, setToolbar] = useState<{ x: number; y: number } | null>(null);
+  const layoutRef = useRef<HTMLDetailsElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const editor = useEditor(
     {
@@ -85,6 +94,23 @@ export function StoryEditor({
     editor?.view.dom.setAttribute("spellcheck", String(spellcheck));
   }, [editor, lineHeight, spellcheck]);
 
+  useEffect(() => { try { localStorage.setItem("novel-studio:ruled-paper", String(ruled)); } catch { /* Display setting only. */ } }, [ruled]);
+  useEffect(() => {
+    if (!editor) return;
+    const position = () => {
+      if (editor.isDestroyed) return;
+      const { from, to, $anchor } = editor.state.selection;
+      editor.view.dom.querySelectorAll(".active-writing-paragraph").forEach(node => node.classList.remove("active-writing-paragraph"));
+      if ($anchor.depth) { const node = editor.view.nodeDOM($anchor.before(1)); if (node instanceof HTMLElement) node.classList.add("active-writing-paragraph"); }
+      if (from === to || editor.view.composing || (!editor.isFocused && !document.activeElement?.closest(".selection-toolbar"))) { setToolbar(null); return; }
+      const start = editor.view.coordsAtPos(from), end = editor.view.coordsAtPos(to);
+      const bounds = editor.view.dom.closest(".editor-view")?.getBoundingClientRect();
+      if (!bounds || end.bottom < bounds.top || start.top > bounds.bottom) { setToolbar(null); return; }
+      setToolbar({ x: Math.max(8, Math.min(start.left, window.innerWidth - 460)), y: Math.max(bounds.top + 4, Math.min(start.top - 48, window.innerHeight - 100)) });
+    };
+    editor.on("selectionUpdate", position); editor.on("update", position); window.addEventListener("resize", position); window.addEventListener("scroll", position, true);
+    return () => { editor.off("selectionUpdate", position); editor.off("update", position); window.removeEventListener("resize", position); window.removeEventListener("scroll", position, true); };
+  }, [editor]);
   useEffect(() => {
     if (!editor || !typewriter) return;
     let frame = 0;
@@ -203,30 +229,37 @@ export function StoryEditor({
   ];
 
   return (
-    <div style={{ "--writing-line-height": lineHeight } as CSSProperties} className={`story-editor ${showMarks ? "show-variable-marks" : ""}`} onContextMenu={e => { if ((e.target as HTMLElement).closest(".story-prose") && openMenu(e.clientX, e.clientY)) e.preventDefault(); }} onKeyDown={e => { if (!e.nativeEvent.isComposing && e.shiftKey && e.key === "F10") { const c = editor.view.coordsAtPos(editor.state.selection.from); if(openMenu(c.left, c.bottom)) e.preventDefault(); } }}>
-      <div className="variable-capture-tools"><button onClick={() => onOpenVariables()}>變數庫（待設定 {variables.filter(v => v.status === "pending").length}）</button><label><input type="checkbox" checked={showMarks} onChange={e => setShowMarks(e.target.checked)} />顯示變數標記</label><span role="status">{notice}</span></div>
-      <label className="manuscript-size-control">正文字級
-        <select aria-label="寫作區正文字級" value={fontSize} onChange={e => onFontSizeChange(Number(e.target.value))}>{Array.from({ length: 22 }, (_, i) => i + 15).map(size => <option key={size} value={size}>{size}px</option>)}</select>
-      </label>
-      <div className="writing-comfort"><details><summary>書寫設定</summary><label>行距<select aria-label="正文行距" value={lineHeight} onChange={e => setLineHeight(Number(e.target.value))}>{[1.6, 1.8, 2, 2.3, 2.6].map(v => <option key={v} value={v}>{v} 倍</option>)}</select></label><label><input type="checkbox" checked={spellcheck} onChange={e => setSpellcheck(e.target.checked)} />拼字檢查</label><small>僅調整閱讀顯示，不改變匯出格式。Ctrl+B 粗體 · Ctrl+I 斜體 · Ctrl+Z 復原 · Ctrl+Shift+V 純文字貼上</small></details><span>{selectedWords > 0 ? `已選取 ${selectedWords} 字／詞` : "中文按字、英文按詞計數"}</span></div>
-      <div className="format-toolbar" role="toolbar" aria-label="正文格式">
-        {tools.map(({ label, icon: Icon, active, action }, index) => (
-          <button
-            key={label}
-            className={`${active ? "active" : ""} ${index === 2 ? "tool-separator" : ""}`}
-            title={label + ({ 復原: " · Ctrl+Z", 重做: " · Ctrl+Shift+Z", 粗體: " · Ctrl+B", 斜體: " · Ctrl+I" }[label] ?? "")}
-            aria-label={label}
-            aria-pressed={index >= 2 ? active : undefined}
-            disabled={index === 0 ? !editor.can().undo() : index === 1 ? !editor.can().redo() : false}
-            onMouseDown={e => e.preventDefault()}
-            onClick={action}
-            type="button"
-          >
-            <Icon size={16} />
-          </button>
-        ))}
-      </div>
+    <div style={{ "--writing-line-height": lineHeight, "--prose-line": `calc(var(--editor-font-size) * ${lineHeight})` } as CSSProperties} className={`story-editor ${ruled ? "ruled-paper" : ""} ${showMarks ? "show-variable-marks" : ""}`} onContextMenu={e => { if ((e.target as HTMLElement).closest(".story-prose") && openMenu(e.clientX, e.clientY)) e.preventDefault(); }} onKeyDown={e => { if (!e.nativeEvent.isComposing && e.shiftKey && e.key === "F10") { const c = editor.view.coordsAtPos(editor.state.selection.from); if(openMenu(c.left, c.bottom)) e.preventDefault(); } }}>
       <EditorContent editor={editor} />
+      <div className="writing-capsule" aria-label="寫作工具">
+        <span>本場 {wordCount.toLocaleString()} 字</span>
+        {selectedWords > 0 && <span className="selection-count">已選取 {selectedWords} 字／詞</span>}
+        <details ref={layoutRef} className="paper-layout" onKeyDown={event => { if (event.key === "Escape" && !event.nativeEvent.isComposing) { event.preventDefault(); event.stopPropagation(); if (layoutRef.current) layoutRef.current.open = false; editor.commands.focus(); } }}>
+          <summary><Settings2 size={15} />版面</summary>
+          <div className="paper-layout-panel">
+            <strong>書寫設定</strong>
+            <label>正文字級<select aria-label="寫作區正文字級" value={fontSize} onChange={e => onFontSizeChange(Number(e.target.value))}>{Array.from({ length: 22 }, (_, i) => i + 15).map(size => <option key={size} value={size}>{size}px</option>)}</select></label>
+            <label>行距<select aria-label="正文行距" value={lineHeight} onChange={e => setLineHeight(Number(e.target.value))}>{[1.6, 1.8, 2, 2.3, 2.6].map(v => <option key={v} value={v}>{v} 倍</option>)}</select></label>
+            <label><input type="checkbox" checked={ruled} onChange={e => setRuled(e.target.checked)} />顯示稿紙行線</label>
+            <label><input type="checkbox" checked={spellcheck} onChange={e => setSpellcheck(e.target.checked)} />拼字檢查</label>
+            <label><input type="checkbox" checked={showMarks} onChange={e => setShowMarks(e.target.checked)} />顯示變數標記</label>
+            <button onClick={() => onOpenVariables()}>變數庫 · 待設定 {variables.filter(v => v.status === "pending").length}</button>
+            <div className="paper-history">{tools.slice(0, 2).map(({ label, icon: Icon, action }, index) => <button key={label} onMouseDown={e => e.preventDefault()} onClick={action} disabled={index === 0 ? !editor.can().undo() : !editor.can().redo()}><Icon size={15} />{label}</button>)}</div>
+            <small>Ctrl+B 粗體 · Ctrl+I 斜體 · Ctrl+Z 復原。版面設定不改變匯出格式。</small>
+          </div>
+        </details>
+        <button onClick={onReference}><Bookmark size={15} />參考</button>
+        <button onClick={onToggleMargin}><PanelRight size={15} />邊欄</button>
+        <button className="focus-action" onClick={onToggleFocus}>{typewriter ? <Minimize2 size={15} /> : <Maximize2 size={15} />}{typewriter ? "退出專注" : "專注"}</button>
+      </div>
+      {notice && <p className="writing-notice" role="status">{notice}</p>}
+      {toolbar && !menu && createPortal(<div className="selection-toolbar" role="toolbar" aria-label="選取文字工具" style={{ left: toolbar.x, top: toolbar.y }} onMouseDown={event => event.preventDefault()}>
+        {tools.filter(tool => ["粗體", "斜體", "引言"].includes(tool.label)).map(({ label, icon: Icon, active, action }) => <button key={label} aria-label={label} title={label} aria-pressed={active} onClick={action}><Icon size={16} /></button>)}
+        <button onClick={() => openMenu(toolbar.x, toolbar.y)}><Variable size={16} />記成變數</button>
+        <button onClick={() => { onAddNote(editor.state.doc.textBetween(editor.state.selection.from, editor.state.selection.to, " ")); setToolbar(null); }}><StickyNote size={16} />在旁邊寫便條</button>
+        <details><summary>更多</summary><div>{tools.filter(tool => ["小標題", "項目清單", "編號清單"].includes(tool.label)).map(({ label, action }) => <button key={label} onClick={action}>{label}</button>)}</div></details>
+      </div>, document.body)}
+
       {menu && createPortal(<div className="variable-context-menu" ref={menuRef} style={{ left: menu.x, top: menu.y }} role="dialog" aria-label="關鍵詞選單">
         <strong>{menu.text.slice(0, 40) || "已連結文字"}</strong>
         {menu.linkedId && variables.some(v => v.id === menu.linkedId) ? <button onClick={() => { onOpenVariables(menu.linkedId); setMenu(null); }}>查看變數</button> : <button disabled={!menu.text.trim()} onClick={() => collect()}>加入互動變數</button>}

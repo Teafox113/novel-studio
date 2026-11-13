@@ -103,7 +103,7 @@ export function AiWorkspace({
     <div className="ai-workspace">
       <aside className="ai-sidebar">
         <header>
-          <div><span className="eyebrow">LOCAL REVIEW</span><h1>AI 協作中心</h1></div>
+          <div><span className="eyebrow">LOCAL REVIEW</span><h1>審核中心</h1></div>
           <span className="ai-local-badge"><ShieldCheck size={12} />本機</span>
         </header>
 
