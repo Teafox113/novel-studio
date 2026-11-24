@@ -46,6 +46,12 @@ describe("BrowserProjectRepository", () => {
     expect(loaded?.title).toBe("霧港十三夜");
   });
 
+  it.each(['{broken', '{}'])("preserves damaged snapshot storage: %s", async raw => {
+    storage.setItem("novel-studio.snapshots.v1", raw);
+    await expect(new BrowserProjectRepository().createSnapshot(sampleProject, "before restore")).rejects.toThrow("備份清單損壞");
+    expect(storage.getItem("novel-studio.snapshots.v1")).toBe(raw);
+  });
+
   it("preserves legacy and new projects across switching and reopening", async () => {
     storage.setItem("novel-studio.project.v1", JSON.stringify(sampleProject));
     const repository = new BrowserProjectRepository();

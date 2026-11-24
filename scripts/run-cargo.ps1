@@ -32,8 +32,9 @@ foreach ($environmentLine in $environmentLines) {
     [Environment]::SetEnvironmentVariable($name, $value, 'Process')
 }
 
-$cargoRoot = if ($env:CARGO_HOME) { $env:CARGO_HOME } else { Join-Path $env:USERPROFILE '.cargo' }
-$cargoPath = Join-Path $cargoRoot 'bin\cargo.exe'
+$cargoPath = Join-Path $env:USERPROFILE '.cargo\bin\cargo.exe'
+if (-not $env:CARGO_HOME) { $env:CARGO_HOME = Join-Path $PSScriptRoot '..\release\cargo-home' }
+$env:Path = "$(Split-Path $cargoPath);$env:Path"
 if (-not (Test-Path -LiteralPath $cargoPath)) {
     throw 'Rust Cargo was not found.'
 }

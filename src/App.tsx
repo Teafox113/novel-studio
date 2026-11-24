@@ -1,4 +1,5 @@
 import { useCloseGuard } from "./storage/useCloseGuard";
+import { restoreProject } from "./storage/restoreProject";
 import { StickyNotes } from "./components/StickyNotes";
 import { FolderBackup } from "./components/FolderBackup";
 import { VariableLibrary } from "./components/VariableLibrary";
@@ -253,6 +254,7 @@ function App() {
   useCloseGuard(!!project && (project !== savedForBackup || saveState !== "saved"), folderBackupPending);
   const [snapshots, setSnapshots] = useState<ProjectSnapshot[]>([]);
   const [operationBusy, setOperationBusy] = useState(false);
+  const [editorGeneration, setEditorGeneration] = useState(0);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [libraryProjects, setLibraryProjects] = useState<Array<{ id: string; title: string }>>([]);
   const [libraryError, setLibraryError] = useState("");
@@ -1543,8 +1545,8 @@ function App() {
         dateStyle: "short",
         timeStyle: "short",
       }).format(new Date());
-      await repository.createSnapshot(project, `匯入前備份 · ${timestamp}`);
-      await repository.save(imported.project);
+      await restoreProject(repository, project, imported.project, `匯入前備份 · ${timestamp}`);
+      setEditorGeneration(value => value + 1);
       setProject(structuredClone(imported.project));
       const firstScene = manuscriptScenes(imported.project)[0];
       setSelectedId(firstScene?.id ?? imported.project.nodes[0]?.id ?? "");
@@ -1594,8 +1596,8 @@ function App() {
         dateStyle: "short",
         timeStyle: "short",
       }).format(new Date());
-      await repository.createSnapshot(project, `還原前備份 · ${timestamp}`);
-      await repository.save(snapshot.project);
+      await restoreProject(repository, project, snapshot.project, `還原前備份 · ${timestamp}`);
+      setEditorGeneration(value => value + 1);
       setProject(structuredClone(snapshot.project));
       const firstScene = manuscriptScenes(snapshot.project)[0];
       setSelectedId(firstScene?.id ?? snapshot.project.nodes[0]?.id ?? "");
@@ -1820,6 +1822,7 @@ function App() {
                   <div className="scene-progress"><progress aria-label="本場寫作進度" value={selectedNode.targetWords ? selectedNode.wordCount : 0} max={Math.max(selectedNode.targetWords ?? 0, 1)} /><span>{selectedNode.wordCount.toLocaleString()} / {selectedNode.targetWords ? selectedNode.targetWords.toLocaleString() : "未設目標"} 字</span></div>
                   <details className="scene-synopsis"><summary>場景摘要</summary><textarea aria-label="場景摘要" value={selectedNode.synopsis} onChange={event => patchNode(selectedNode.id, { synopsis: event.target.value })} /></details>
                   <StoryEditor
+                    key={`${project.id}:${editorGeneration}`}
                     wordCount={selectedNode.wordCount}
                     onReference={() => setResearchPeekOpen(open => !open)}
                     onToggleFocus={() => setFocusMode(value => !value)}

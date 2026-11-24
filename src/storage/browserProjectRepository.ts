@@ -54,8 +54,9 @@ export class BrowserProjectRepository implements ProjectRepository {
     if (stored) {
       try {
         snapshots = JSON.parse(stored) as ProjectSnapshot[];
+        if (!Array.isArray(snapshots)) throw new Error("Invalid snapshot list");
       } catch {
-        snapshots = [];
+        throw new Error("備份清單損壞，已保留原始資料並停止建立快照與還原。");
       }
     }
 

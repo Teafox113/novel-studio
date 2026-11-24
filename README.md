@@ -2,33 +2,33 @@
 
 <img src="public/creator-avatar.png" alt="FloofyFox" width="64" />
 
-**FloofyFox · Novel Studio v0.18.0** · [by floofyfox](https://github.com/Teafox113) · 更新日期：2026-10-28
+**FloofyFox · Novel Studio v0.19.0** · [by floofyfox](https://github.com/Teafox113) · 更新日期：2026-11-24
 
 **讓手稿、人物、世界觀與研究資料，留在同一個創作空間。**
 
 Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯器。從場景卡片、人物設定到雙軸時間線，協助作者方便整理故事架構以及隨時參考查閱設定；需要專心寫作時，可以切換打字機模式，進行沉浸式碼字，也可以讓參考資料留在角落。
 
-## 最新更新 · v0.18.0
+## 最新更新 · v0.19.0
 
-2026-10-28
+2026-11-24
 
-- **安全還原**：資料夾備份歷史、作品與差異預覽，還原前先建立安全快照。
-- **資料保護**：儲存與還原依序執行；未儲存或未完成資料夾備份時提供離開提示。
-- **便條紙改善**：回收區與復原、記住位置與收合狀態，支援 `Ctrl+Shift+N`。
+- **新寫作介面**：稿紙、明暗主題與「寫作／設定／成書」三模式。
+- **就近記錄靈感**：反白正文記成變數或摘錄便條，細節可以稍後補齊。
+- **資料安全**：Windows 單一寫入者保護，匯入／還原前備份所有即將被覆蓋的作品。
 
-[查看完整更新紀錄](CHANGELOG.md) · [前往本版下載](https://github.com/Teafox113/novel-studio/releases/tag/v0.18.0)
+[查看完整更新紀錄](CHANGELOG.md) · [前往本版下載](https://github.com/Teafox113/novel-studio/releases/tag/v0.19.0)
 
 ## 下載並安裝（一般使用者）
 
-> **2026-11-12 開發版：C「稿紙・留白」改版。** 三模式、目錄抽屜、明暗主題、稿紙行線、選文變數／便條、人物辭條與匯出檢查已實作。下方 v0.18.0 安裝檔仍是舊介面；新版尚待 Windows 原生驗收。[新開發清單](docs/ROADMAP.md) · [稽核修訂說明](docs/C_DESIGN_IMPLEMENTATION.md) · [收集助手試用](extensions/capture-assistant/README.md)。
+> **v0.19.0 採用 C「稿紙・留白」介面。** 新增三模式、目錄抽屜、明暗主題、選文變數／便條，以及 Windows 寫入保護與跨作品還原安全快照。[更新紀錄](docs/RELEASE_0.19.0.md) · [開發清單](docs/ROADMAP.md)。
 
-**目前版本：0.18.0 · Windows 10／11 x64**
+**目前版本：0.19.0 · Windows 10／11 x64**
 
 ### 推薦：下載安裝版
 
-**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.18.0/Novel-Studio-0.18.0-Windows-x64-Setup.exe)**
+**[⬇ 下載 Windows 安裝版 EXE](https://github.com/Teafox113/novel-studio/releases/download/v0.19.0/Novel-Studio-0.19.0-Windows-x64-Setup.exe)**
 
-1. 點上方連結，下載 `Novel-Studio-0.18.0-Windows-x64-Setup.exe`。
+1. 點上方連結，下載 `Novel-Studio-0.19.0-Windows-x64-Setup.exe`。
 2. 開啟下載的檔案，依安裝畫面指示完成安裝。
 3. 從 Windows 開始功能表開啟 **Novel Studio**，即可開始使用。
 
@@ -36,13 +36,13 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 
 ### 不想安裝：下載免安裝版
 
-**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.18.0/Novel-Studio-0.18.0-Windows-x64-NoInstall.zip)**
+**[⬇ 下載 Windows 免安裝 ZIP](https://github.com/Teafox113/novel-studio/releases/download/v0.19.0/Novel-Studio-0.19.0-Windows-x64-NoInstall.zip)**
 
 下載後按右鍵選「解壓縮全部」，再進入解壓後的資料夾，開啟 `Novel-Studio.exe`。請完整解壓後再執行。
 
 免安裝版需要 WebView2 Runtime；若電腦缺少此執行環境，可改用上方安裝版。**資料仍保存在 Windows 使用者目錄，不會跟著 ZIP 或 EXE 搬移**；安裝版與免安裝版共用本機資料，請勿同時開啟編輯。
 
-[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.18.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
+[其他下載：MSI、更新紀錄與 SHA-256 校驗碼](https://github.com/Teafox113/novel-studio/releases/tag/v0.19.0) · [查看最新版本](https://github.com/Teafox113/novel-studio/releases/latest)
 
 > 上方 GitHub 的「Code → Download ZIP」與 Releases 的「Source code」是原始碼。要直接使用軟體，請選本頁的 **安裝版 EXE** 或 **免安裝 ZIP**。
 
@@ -53,11 +53,11 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 3. 輸入小說名稱與作者，按 **「新建空白小說」**。
 4. 在「第一章」輸入正文，等右上角顯示 **「已儲存」**。
 
-想專心寫作可按「打字機」，按 `Esc` 返回；想保留一份檔案，使用「⋯ → 匯出專案」保存 `.novel` 備份。
+想專心寫作可按正文下方的「專注」，按 `Esc` 返回；想保留一份檔案，使用「⋯ → 匯出專案」保存 `.novel` 備份。
 
 ### 隨手開啟便條紙
 
-點右下角 **便條紙**，可新增多張、修改標題、切換、移到左／右側及收合。內容隨作品自動儲存，關閉只隱藏便條；也能在手稿靈感清單找到。請等「已儲存於本作品」再退出。可用 `Ctrl+Shift+N` 開啟／關閉；移到回收區後可以復原。位置、收合狀態與選取便條會在這台裝置上依作品記住。
+在寫作邊欄點 **便條紙**，可新增多張、修改標題、切換及收合；也能反白正文後選「在旁邊寫便條」。內容隨作品自動儲存，關閉只隱藏便條；也能在手稿靈感清單找到。請等「已儲存於本作品」再退出。可用 `Ctrl+Shift+N` 開啟／關閉；移到回收區後可以復原。收合狀態與選取便條會在這台裝置上依作品記住。
 
 ### 同時備份到本機與 Google Drive
 
@@ -108,7 +108,7 @@ Novel Studio 是以繁體中文介面為主、本機使用的長篇小說編輯�
 | 書稿輸出 | DOCX、EPUB 3、HTML、UTF-8 文字，以及系統列印為 PDF |
 | 本機審核 | 摘要與事實候選、缺漏與一致性提示、來源引文、接受／略過紀錄 |
 
-目前的「AI 協作」是本機預設接入口，尚未串接大型語言模型或雲端問答。
+「成書 → 審核」提供本機規則檢查，尚未串接大型語言模型或雲端問答。
 
 [完整使用指南：下載、免安裝、建立小說、備份與升級](docs/USER_GUIDE.md)
 
@@ -226,9 +226,9 @@ docs/             功能說明與路線圖
 
 [完整更新紀錄](CHANGELOG.md) · [第三方函式庫、版本與授權](THIRD_PARTY_LICENSES.md)
 
-0.18.0 改善備份預覽與安全還原、關閉提示及便條紙回收操作，提供 EXE、MSI 與免安裝 ZIP。升級前請匯出 `.novel` 備份、關閉舊版，再執行新版安裝檔。
+0.19.0 改善備份預覽與安全還原、關閉提示及便條紙回收操作，提供 EXE、MSI 與免安裝 ZIP。升級前請匯出 `.novel` 備份、關閉舊版，再執行新版安裝檔。
 
-## C 案開發版操作（尚未包含在 v0.18.0 安裝檔）
+## C 稿紙介面操作（v0.19.0）
 
 - **寫作**：左上目錄鈕開啟章節抽屜；可釘住，方向鍵選取、Enter 開場景、Esc 返回正文。卡片牆／大綱在目錄底部。
 - **版面與專注**：稿紙底部開啟版面設定；行距、字級、拼字、稿紙行線與變數標記都在這裡。介面字型與縮放在「⋯ → 介面與字型」，與正文分開。

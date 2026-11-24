@@ -32,8 +32,9 @@ foreach ($environmentLine in $environmentLines) {
     [Environment]::SetEnvironmentVariable($name, $value, 'Process')
 }
 
-$cargoRoot = if ($env:CARGO_HOME) { $env:CARGO_HOME } else { Join-Path $env:USERPROFILE '.cargo' }
-$rustBinaryPath = Join-Path $cargoRoot 'bin'
+$rustBinaryPath = Join-Path $env:USERPROFILE '.cargo\bin'
+# Keep downloaded crates isolated from a damaged global registry cache.
+if (-not $env:CARGO_HOME) { $env:CARGO_HOME = Join-Path $PSScriptRoot '..\release\cargo-home' }
 $env:Path = "$rustBinaryPath;$env:Path"
 
 $tauriCliPath = Join-Path $PSScriptRoot '..\node_modules\@tauri-apps\cli\tauri.js'

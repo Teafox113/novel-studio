@@ -65,6 +65,9 @@ pub fn backup_disconnect(app: tauri::AppHandle, lock: State<BackupLock>, slot: S
 // Only writes new snapshots inside a directory selected by the native folder picker.
 // A partially written file never receives the .novel extension.
 fn write_snapshot(folder: &Path, content: &str) -> Result<String, String> {
+    write_snapshot_using(folder, content, |file, bytes| file.write_all(bytes))
+}
+fn write_snapshot_using(folder: &Path, content: &str, write: impl FnOnce(&mut fs::File, &[u8]) -> std::io::Result<()>) -> Result<String, String> {
     let archive: serde_json::Value = serde_json::from_str(content).map_err(|_| "備份內容不是有效 JSON")?;
     if archive["format"] != "novel-studio-project" || archive["formatVersion"] != 1 || !archive["project"].is_object() {
         return Err("備份格式不正確".into());
@@ -78,7 +81,7 @@ fn write_snapshot(folder: &Path, content: &str) -> Result<String, String> {
     let temp = target.with_extension("partial");
     let result = (|| {
         let mut file = fs::OpenOptions::new().write(true).create_new(true).open(&temp).map_err(|e| e.to_string())?;
-        file.write_all(content.as_bytes()).map_err(|e| e.to_string())?;
+        write(&mut file, content.as_bytes()).map_err(|e| e.to_string())?;
         file.sync_all().map_err(|e| e.to_string())?;
         drop(file);
         if fs::read(&temp).map_err(|e| e.to_string())? != content.as_bytes() { return Err("備份寫入驗證失敗".into()); }
@@ -103,6 +106,36 @@ pub async fn backup_write(app: tauri::AppHandle, slot: String, content: String) 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn failed_partial_write_preserves_previous_backup_and_is_not_listed() {
+        let dir = std::env::temp_dir().join(format!("novel-failure-test-{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
+        fs::create_dir(&dir).unwrap();
+        let data = r#"{"format":"novel-studio-project","formatVersion":1,"project":{"title":"安全備份"}}"#;
+        let old = write_snapshot(&dir, data).unwrap();
+        let result = write_snapshot_using(&dir, data, |file, bytes| {
+            file.write_all(&bytes[..10])?;
+            Err(std::io::Error::new(std::io::ErrorKind::StorageFull, "injected disk full"))
+        });
+        assert!(result.is_err());
+        assert_eq!(fs::read_to_string(dir.join(&old)).unwrap(), data);
+        assert_eq!(fs::read_dir(&dir).unwrap().count(), 1);
+        assert!(write_snapshot(&dir, "{truncated").is_err());
+        fs::write(dir.join("Novel-incomplete.partial"), "partial").unwrap();
+        assert_eq!(list_backups(&dir).unwrap().len(), 1);
+        fs::remove_file(dir.join("Novel-incomplete.partial")).unwrap();
+        fs::remove_file(dir.join(old)).unwrap();
+        fs::remove_dir(dir).unwrap();
+    }
+
+    #[test]
+    fn missing_or_invalid_destination_never_creates_a_backup() {
+        let path = std::env::temp_dir().join(format!("novel-invalid-{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
+        fs::write(&path, "existing data").unwrap();
+        let data = r#"{"format":"novel-studio-project","formatVersion":1,"project":{}}"#;
+        assert!(write_snapshot(&path, data).is_err());
+        assert_eq!(fs::read_to_string(&path).unwrap(), "existing data");
+        fs::remove_file(path).unwrap();
+    }
     #[test]
     fn snapshots_are_unique_complete_and_preserve_old_versions() {
         let dir = std::env::temp_dir().join(format!("novel-backup-test-{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));

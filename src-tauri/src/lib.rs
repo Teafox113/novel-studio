@@ -1,5 +1,8 @@
 use tauri_plugin_sql::{Migration, MigrationKind};
 mod folder_backup;
+mod writer_lock;
+use tauri::Manager;
+use tauri_plugin_dialog::DialogExt;
 
 const DATABASE_URL: &str = "sqlite:novel-studio.db";
 
@@ -45,6 +48,19 @@ pub fn run() {
     ];
 
     tauri::Builder::default()
+        .setup(|app| {
+            let dir = app.path().app_data_dir()?;
+            std::fs::create_dir_all(&dir)?;
+            match writer_lock::acquire(&dir.join("writer.lock")) {
+                Ok(lock) => { app.manage(lock); }
+                Err(error) => {
+                    app.dialog().message(format!("Novel Studio 無法開啟寫作資料。請先關閉其他已開啟的 Novel Studio 視窗，再重試。\n\n{error}"))
+                        .title("作品寫入保護").blocking_show();
+                    std::process::exit(0);
+                }
+            }
+            Ok(())
+        })
         .manage(folder_backup::BackupLock::default())
         .invoke_handler(tauri::generate_handler![folder_backup::backup_config, folder_backup::backup_select, folder_backup::backup_disconnect, folder_backup::backup_write, folder_backup::backup_list, folder_backup::backup_read])
         .plugin(tauri_plugin_dialog::init())
